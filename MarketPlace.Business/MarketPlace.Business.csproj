@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MarketPlace.Common\MarketPlace.Common.csproj" />
+    <ProjectReference Include="..\MarketPlace.DataAccess\MarketPlace.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

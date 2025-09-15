@@ -2,11 +2,6 @@
 using MarketPlace.Common.DTOs.ResponseModels.Markup;
 using MarketPlace.DataAccess.Repositories.Markup.Interface;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MarketPlace.Infrastucture.Markup.Queries.GetAllMarkups
 {

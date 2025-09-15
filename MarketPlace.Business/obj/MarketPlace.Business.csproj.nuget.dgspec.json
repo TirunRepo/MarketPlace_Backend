@@ -34,6 +34,9 @@
             "projectReferences": {
               "C:\\MarketPlace_Backend\\MarketPlace.Common\\MarketPlace.Common.csproj": {
                 "projectPath": "C:\\MarketPlace_Backend\\MarketPlace.Common\\MarketPlace.Common.csproj"
+              },
+              "C:\\MarketPlace_Backend\\MarketPlace.DataAccess\\MarketPlace.DataAccess.csproj": {
+                "projectPath": "C:\\MarketPlace_Backend\\MarketPlace.DataAccess\\MarketPlace.DataAccess.csproj"
               }
             }
           }
@@ -144,6 +147,14 @@
             "AutoMapper": {
               "target": "Package",
               "version": "[14.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.9, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.14.0, )"
             }
           },
           "imports": [

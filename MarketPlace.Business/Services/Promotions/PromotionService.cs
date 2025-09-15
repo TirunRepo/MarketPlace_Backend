@@ -2,7 +2,7 @@
 using MarketPlace.Business.Interfaces.Promotions;
 using MarketPlace.Common.DTOs.RequestModels.Promotions;
 using MarketPlace.Common.DTOs.ResponseModels.Promotions;
-using MarketPlace.Common.Types;
+using MarketPlace.Common.Types.Promotion;
 using MarketPlace.DataAccess.Entities.Promotions;
 using MarketPlace.DataAccess.Repositories.Promotions.Interface;
 

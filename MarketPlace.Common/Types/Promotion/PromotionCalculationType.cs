@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MarketPlace.Common.Types
+namespace MarketPlace.Common.Types.Promotion
 {
     public enum PromotionCalculationType
     {
