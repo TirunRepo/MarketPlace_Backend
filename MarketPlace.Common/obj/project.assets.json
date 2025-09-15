@@ -2898,11 +2898,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\Downloads\\MarketPlace.Backend\\MarketPlace.Common\\MarketPlace.Common.csproj",
+      "projectUniqueName": "C:\\MarketPlace_Backend\\MarketPlace.Common\\MarketPlace.Common.csproj",
       "projectName": "MarketPlace.Common",
-      "projectPath": "C:\\Users\\User\\Downloads\\MarketPlace.Backend\\MarketPlace.Common\\MarketPlace.Common.csproj",
+      "projectPath": "C:\\MarketPlace_Backend\\MarketPlace.Common\\MarketPlace.Common.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\User\\Downloads\\MarketPlace.Backend\\MarketPlace.Common\\obj\\",
+      "outputPath": "C:\\MarketPlace_Backend\\MarketPlace.Common\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -2923,8 +2923,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\User\\Downloads\\MarketPlace.Backend\\MarketPlace.DataAccess\\MarketPlace.DataAccess.csproj": {
-              "projectPath": "C:\\Users\\User\\Downloads\\MarketPlace.Backend\\MarketPlace.DataAccess\\MarketPlace.DataAccess.csproj"
+            "C:\\MarketPlace_Backend\\MarketPlace.DataAccess\\MarketPlace.DataAccess.csproj": {
+              "projectPath": "C:\\MarketPlace_Backend\\MarketPlace.DataAccess\\MarketPlace.DataAccess.csproj"
             }
           }
         }

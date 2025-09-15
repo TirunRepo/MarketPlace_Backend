@@ -2841,11 +2841,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\Downloads\\MarketPlace.Backend\\MarketPlace.Infrastucture\\MarketPlace.Infrastucture.csproj",
+      "projectUniqueName": "C:\\MarketPlace_Backend\\MarketPlace.Infrastucture\\MarketPlace.Infrastucture.csproj",
       "projectName": "MarketPlace.Infrastucture",
-      "projectPath": "C:\\Users\\User\\Downloads\\MarketPlace.Backend\\MarketPlace.Infrastucture\\MarketPlace.Infrastucture.csproj",
+      "projectPath": "C:\\MarketPlace_Backend\\MarketPlace.Infrastucture\\MarketPlace.Infrastucture.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\User\\Downloads\\MarketPlace.Backend\\MarketPlace.Infrastucture\\obj\\",
+      "outputPath": "C:\\MarketPlace_Backend\\MarketPlace.Infrastucture\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -2866,8 +2866,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\User\\Downloads\\MarketPlace.Backend\\MarketPlace.Business\\MarketPlace.Business.csproj": {
-              "projectPath": "C:\\Users\\User\\Downloads\\MarketPlace.Backend\\MarketPlace.Business\\MarketPlace.Business.csproj"
+            "C:\\MarketPlace_Backend\\MarketPlace.Business\\MarketPlace.Business.csproj": {
+              "projectPath": "C:\\MarketPlace_Backend\\MarketPlace.Business\\MarketPlace.Business.csproj"
             }
           }
         }
