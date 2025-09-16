@@ -3,315 +3,150 @@ using MarketPlace.Business.Interfaces.Inventory;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.Types.Inventory;
 using MarketPlace.DataAccess.DBContext;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using OfficeOpenXml;
-using System.ComponentModel;
-using System.Text.Json;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Marketplace.API.Controllers.Inventory
 {
-    [Route("api/[area]/[controller]")]
     [ApiController]
-    [Area("Admin")]
+    [Route("api/[controller]")]
     public class CruiseInventoriesController : ControllerBase
     {
-        private readonly AppDbContext _context;
         private readonly IMapper _mapper;
         private readonly IDeparturePortService _departurePortService;
         private readonly ICruiseShipService _cruiseShipService;
-        private readonly IcruiseInventoryService _cruiseInventories;
+        private readonly IcruiseInventoryService _cruiseInventoryService;
         private readonly ICruiseLineService _cruiseLineService;
         private readonly IDestinationService _destinationService;
         private readonly ICruisePricingInventoryService _cruisePricingInventoryService;
         private readonly ISailDateService _sailDateService;
         private readonly ICruisePricingCabinService _cruisePricingCabinService;
+        private readonly AppDbContext _context;
 
         public CruiseInventoriesController(
-            AppDbContext context,
             IDeparturePortService departurePortService,
             ISailDateService sailDateService,
             ICruiseShipService cruiseShipService,
-            IcruiseInventoryService cruiseInventories,
+            IcruiseInventoryService cruiseInventoryService,
             ICruiseLineService cruiseLineService,
             IDestinationService destinationService,
             ICruisePricingInventoryService cruisePricingInventoryService,
             ICruisePricingCabinService cruisePricingCabinService,
-            IMapper mapper)
+            IMapper mapper,
+            AppDbContext context)
         {
-            _context = context;
             _departurePortService = departurePortService;
             _cruiseShipService = cruiseShipService;
-            _cruiseInventories = cruiseInventories;
+            _cruiseInventoryService = cruiseInventoryService;
             _cruiseLineService = cruiseLineService;
             _destinationService = destinationService;
             _cruisePricingInventoryService = cruisePricingInventoryService;
             _sailDateService = sailDateService;
             _cruisePricingCabinService = cruisePricingCabinService;
             _mapper = mapper;
+            _context = context;
         }
 
-        // GET: api/Admin/CruiseInventories
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("occupancies")]
+        public async Task<ActionResult<IEnumerable<SelectListItem>>> GetOccupancies(int sailDateId, string groupId, string category)
         {
-            var inventories = await _cruiseInventories.GetAll();
-            return Ok(inventories);
-        }
+            var sailDate = await GetSailDateByIdAsync(sailDateId);
+            if (sailDate is null) return NotFound();
 
-        [HttpGet("SailDates")]
-        public async Task<IActionResult> GetSailDates()
-        {
-            var sailDates = await _sailDateService.GetAll();
-            var result = sailDates
-                .OrderBy(x => x.SailDateTime)
-                .ThenBy(x => x.CruiseShipDto?.ShipCode)
-                .Select(s => new
+            var result = (await _cruisePricingInventoryService.GetAll())
+                .Where(x => x.CruiseInventory.GroupId == groupId
+                         && x.CruiseInventory.SailDate.Date == sailDate.SailDateTime.Date
+                         && x.CruiseInventory.CruiseShip.CruiseShipId == sailDate.CruiseShipID
+                         && x.Category == category)
+                .Select(x => x.CabinOccupancy)
+                .Distinct()
+                .OrderBy(x => x)
+                .Select(o => new SelectListItem
                 {
-                    s.SaleDateId,
-                    Text = (!string.IsNullOrEmpty(s.CruiseShipDto?.ShipCode) ? s.CruiseShipDto.ShipCode + "-" : "") + s.SailDateTime.ToString("ddMMMyyyy")
-                });
+                    Value = o,
+                    Text = Enum.GetName(typeof(CabinOccupancyEnum), int.Parse(o)) ?? o
+                })
+                .ToList();
+
             return Ok(result);
         }
 
-        [HttpGet("Groups/{sailDateId}")]
-        public async Task<IActionResult> GetGroups(int sailDateId)
+        [HttpGet("staterooms")]
+        public async Task<ActionResult<IEnumerable<SelectListItem>>> GetStaterooms(int sailDateId, string groupId, string category, string occupancy)
         {
-            var sailDate = (await _sailDateService.GetAll()).FirstOrDefault(x => x.SaleDateId == sailDateId);
-            if (sailDate == null) return NotFound();
+            var sailDate = await GetSailDateByIdAsync(sailDateId);
+            if (sailDate is null) return NotFound();
 
-            var groups = (await _cruiseInventories.GetAll())
-                .Where(x => x.SailDate.Date == sailDate.SailDateTime.Date && x.CruiseShip.CruiseShipId == sailDate.CruiseShipID)
-                .Select(x => x.GroupId)
-                .Distinct()
-                .OrderBy(g => g);
-
-            return Ok(groups);
-        }
-
-        [HttpGet("Categories")]
-        public async Task<IActionResult> GetCategories(int sailDateId, string groupId)
-        {
-            var sailDate = (await _sailDateService.GetAll()).FirstOrDefault(x => x.SaleDateId == sailDateId);
-            if (sailDate == null) return NotFound();
-
-            var categories = (await _cruisePricingInventoryService.GetAll())
-                .Where(x => x.CruiseInventory.GroupId == groupId &&
-                            x.CruiseInventory.SailDate.Date == sailDate.SailDateTime.Date &&
-                            x.CruiseInventory.CruiseShip.CruiseShipId == sailDate.CruiseShipID)
-                .Select(x => x.Category)
-                .Distinct()
-                .OrderBy(c => c);
-
-            return Ok(categories);
-        }
-
-        [HttpGet("Occupancies")]
-        public async Task<IActionResult> GetOccupancies(int sailDateId, string groupId, string category)
-        {
-            var sailDate = (await _sailDateService.GetAll()).FirstOrDefault(x => x.SaleDateId == sailDateId);
-            if (sailDate == null) return NotFound();
-
-            var occupancies = (await _cruisePricingInventoryService.GetAll())
-                .Where(x => x.CruiseInventory.GroupId == groupId &&
-                            x.CruiseInventory.SailDate.Date == sailDate.SailDateTime.Date &&
-                            x.CruiseInventory.CruiseShip.CruiseShipId == sailDate.CruiseShipID &&
-                            x.Category == category)
-                .Select(x => x.CabinOccupancy)
-                .Distinct()
-                .OrderBy(o => o);
-
-            return Ok(occupancies);
-        }
-
-        [HttpGet("Staterooms")]
-        public async Task<IActionResult> GetStaterooms(int sailDateId, string groupId, string category, string occupancy)
-        {
-            var sailDate = (await _sailDateService.GetAll()).FirstOrDefault(x => x.SaleDateId == sailDateId);
-            if (sailDate == null) return NotFound();
-
-            var staterooms = (await _cruisePricingInventoryService.GetAll())
-                .Where(x => x.CruiseInventory.GroupId == groupId &&
-                            x.CruiseInventory.SailDate.Date == sailDate.SailDateTime.Date &&
-                            x.CruiseInventory.CruiseShip.CruiseShipId == sailDate.CruiseShipID &&
-                            x.Category == category &&
-                            x.CabinOccupancy == occupancy)
+            var result = (await _cruisePricingInventoryService.GetAll())
+                .Where(x => x.CruiseInventory.GroupId == groupId
+                         && x.CruiseInventory.SailDate.Date == sailDate.SailDateTime.Date
+                         && x.CruiseInventory.CruiseShip.CruiseShipId == sailDate.CruiseShipID
+                         && x.Category == category
+                         && x.CabinOccupancy == occupancy)
                 .Select(x => x.CabinCategory)
                 .Distinct()
-                .OrderBy(s => s);
-
-            return Ok(staterooms);
-        }
-
-        [HttpGet("FilterCabins")]
-        public async Task<IActionResult> FilterCabins(int sailDateId, string groupId, string category, string occupancy, string cabinCategory)
-        {
-            var sailDate = (await _sailDateService.GetAll()).FirstOrDefault(x => x.SaleDateId == sailDateId);
-            if (sailDate == null) return NotFound();
-
-            var cabins = await _cruisePricingCabinService.GetCruiseCabinAsyn();
-            var filtered = cabins.Where(x =>
-                x.GroupId == groupId &&
-                x.Date.Date == sailDate.SailDateTime.Date &&
-                x.CruiseShipId == sailDate.CruiseShipID &&
-                x.CategoryId == category &&
-                x.CabinOccupancy == ((CabinOccupancyEnum)int.Parse(occupancy)).ToString() &&
-                x.Stateroom == ((CabinCategoryEnum)int.Parse(cabinCategory)).ToString())
-                .Select(x => new
+                .OrderBy(x => x)
+                .Select(c => new SelectListItem
                 {
-                    x.Id,
-                    x.CabinNumber,
-                    x.CabinOccupancy,
-                    x.CabinStatus,
-                    x.CategoryId,
-                    x.CruiseInventoryId,
-                    x.CruisePricingInventoryId,
-                    x.CruiseShipId,
-                    x.GroupId,
-                    x.Stateroom,
-                    SailDate = (!string.IsNullOrEmpty(sailDate.CruiseShipDto?.ShipCode) ? sailDate.CruiseShipDto.ShipCode + "-" : "") + sailDate.SailDateTime.ToString("ddMMMyyyy")
-                });
+                    Value = c,
+                    Text = Enum.GetName(typeof(CabinCategoryEnum), int.Parse(c)) ?? c
+                })
+                .ToList();
 
-            return Ok(filtered);
+            return Ok(result);
         }
 
-        [HttpPost("UpdateCabin")]
+        [HttpPost("update-cabin")]
         public async Task<IActionResult> UpdateCabin([FromBody] CruiseCabinDto model)
         {
             await _cruisePricingCabinService.UpdateCabinAsync(model.Id, model.CabinNumber, model.CategoryId);
-            return Ok(true);
+            return Ok();
         }
 
-        [HttpPost("AddCabins")]
+        [HttpPost("add-cabins")]
         public async Task<IActionResult> AddCabins([FromBody] CruiseCabinDto model)
         {
             var cabins = await _cruisePricingCabinService.GetCruiseCabinAsyn();
-            var sailDate = (await _sailDateService.GetAll()).FirstOrDefault(x => x.SaleDateId == int.Parse(model.SailDate));
-            var data = cabins.Where(x =>
-                x.GroupId == model.GroupId &&
-                x.Date.Date == sailDate.SailDateTime.Date &&
-                x.CruiseShipId == sailDate.CruiseShipID &&
-                x.CategoryId == model.CategoryId &&
-                x.CabinOccupancy == ((CabinOccupancyEnum)int.Parse(model.CabinOccupancy)).ToString() &&
-                x.Stateroom == ((CabinCategoryEnum)int.Parse(model.Stateroom)).ToString()).ToList();
+            var sailDate = await GetSailDateByIdAsync(int.Parse(model.SailDate));
+            if (sailDate is null) return NotFound("SailDate not found.");
 
-            var cabinDetails = await GetCruisePricingCabins(model, data);
+            var matching = cabins
+                .Where(x => x.GroupId == model.GroupId
+                         && x.Date.Date == sailDate.SailDateTime.Date
+                         && x.CruiseShipId == sailDate.CruiseShipID
+                         && x.CategoryId == model.CategoryId
+                         && x.CabinOccupancy == ((CabinOccupancyEnum)int.Parse(model.CabinOccupancy)).ToString()
+                         && x.Stateroom == ((CabinCategoryEnum)int.Parse(model.Stateroom)).ToString())
+                .ToList();
+
+            var cabinDetails = GenerateCabins(model, matching);
             await _cruisePricingCabinService.InsertCabinsAsync(cabinDetails);
-
-            return Ok(true);
+            return Ok();
         }
 
-        [HttpPost("UploadExcel")]
-        public async Task<IActionResult> UploadExcel(IFormFile file)
+        private static List<CruisePricingCabinDto> GenerateCabins(CruiseCabinDto cabin, List<CruiseCabinDto> existing)
         {
-            if (file == null || file.Length == 0) return BadRequest("File is empty");
-
-            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-            using var stream = file.OpenReadStream();
-            using var package = new ExcelPackage(stream);
-            var worksheet = package.Workbook.Worksheets.FirstOrDefault();
-            if (worksheet == null) return BadRequest("No worksheet found");
-
-            int rowCount = worksheet.Dimension.Rows;
-            var cruiseInventoryFormViewModels = new List<CruiseInventoryFormViewModel>();
-
-            for (int row = 2; row <= rowCount; row++)
-            {
-                var model = new CruiseInventoryFormViewModel
-                {
-                    CruiseInventoryDto = new CruiseInventoryDto
-                    {
-                        GroupId = worksheet.Cells[row, 1].Text,
-                        PackageDescription = worksheet.Cells[row, 2].Text,
-                        Nights = int.Parse(worksheet.Cells[row, 3].Text),
-                        AgencyID = !string.IsNullOrEmpty(worksheet.Cells[row, 4].Text) ? int.Parse(worksheet.Cells[row, 4].Text) : null,
-                        Destination = new DestinationDto { DestinationName = worksheet.Cells[row, 5].Text },
-                        DeparturePort = new DeparturePortDto { DeparturePortName = worksheet.Cells[row, 6].Text },
-                        CruiseShip = new CruiseShipDto { ShipName = worksheet.Cells[row, 7].Text },
-                        SailDate = DateTime.Parse(worksheet.Cells[row, 8].Text)
-                    },
-                    cruisePricingInventoryDto = new CruisePricingInventoryDto
-                    {
-                        SinglePrice = decimal.TryParse(worksheet.Cells[row, 9].Text, out var sp) ? sp : null,
-                        DoublePrice = decimal.TryParse(worksheet.Cells[row, 10].Text, out var dp) ? dp : null,
-                        ThreeFourthPrice = decimal.TryParse(worksheet.Cells[row, 11].Text, out var tdp) ? tdp : null,
-                        NCCF = decimal.TryParse(worksheet.Cells[row, 12].Text, out var nccf) ? nccf : null,
-                        Tax = decimal.TryParse(worksheet.Cells[row, 13].Text, out var tax) ? tax : null,
-                        Grats = decimal.TryParse(worksheet.Cells[row, 14].Text, out var grats) ? grats : null,
-                        CabinCategory = worksheet.Cells[row, 15].Text,
-                        CabinNo = worksheet.Cells[row, 16].Text,
-                        Category = worksheet.Cells[row, 17].Text,
-                        PriceValidFrom = DateTime.TryParse(worksheet.Cells[row, 18].Text, out var from) ? from : null,
-                        PriceValidTo = DateTime.TryParse(worksheet.Cells[row, 19].Text, out var to) ? to : null,
-                        CabinOccupancy = worksheet.Cells[row, 20].Text,
-                        CabinNoType = worksheet.Cells[row, 21].Text
-                    }
-                };
-                cruiseInventoryFormViewModels.Add(model);
-            }
-
-            // Map destinations, ports, ships
-            var destinations = await _destinationService.GetAll();
-            var ports = await _departurePortService.GetAll();
-            var ships = await _cruiseShipService.GetAll();
-
-            foreach (var item in cruiseInventoryFormViewModels)
-            {
-                if (!string.IsNullOrEmpty(item.CruiseInventoryDto.Destination.DestinationName))
-                {
-                    var dest = destinations.FirstOrDefault(x => x.DestinationName.ToLower().Contains(item.CruiseInventoryDto.Destination.DestinationName.ToLower()));
-                    if (dest != null) item.CruiseInventoryDto.Destination = dest;
-                }
-
-                if (!string.IsNullOrEmpty(item.CruiseInventoryDto.DeparturePort.DeparturePortName))
-                {
-                    var port = ports.FirstOrDefault(x => x.DeparturePortName.ToLower().Contains(item.CruiseInventoryDto.DeparturePort.DeparturePortName.ToLower()));
-                    if (port != null) item.CruiseInventoryDto.DeparturePort = port;
-                }
-
-                if (!string.IsNullOrEmpty(item.CruiseInventoryDto.CruiseShip.ShipName))
-                {
-                    var ship = ships.FirstOrDefault(x => x.ShipName.ToLower().Contains(item.CruiseInventoryDto.CruiseShip.ShipName.ToLower()));
-                    if (ship != null) item.CruiseInventoryDto.CruiseShip = ship;
-                }
-
-                item.CruiseInventoryDto.CreatedOn = DateTime.Now;
-                item.CruiseInventoryDto.CreatedBy = 1;
-
-                var cruiseInventory = await _cruiseInventories.Insert(item.CruiseInventoryDto);
-                item.cruisePricingInventoryDto.CruiseInventoryId = cruiseInventory.CruiseInventoryId;
-                await _cruisePricingInventoryService.Insert(item.cruisePricingInventoryDto);
-            }
-
-            return Ok(new { Message = "All rows saved successfully" });
-        }
-
-        // Helper to create CruisePricingCabins
-        private async Task<List<CruisePricingCabinDto>> GetCruisePricingCabins(CruiseCabinDto cabin, List<CruiseCabinDto> data)
-        {
-            List<CruisePricingCabinDto> cabins = new List<CruisePricingCabinDto>();
+            var cabins = new List<CruisePricingCabinDto>();
             int cabinIndex = 1;
 
-            if (cabin.Type == "Gty" && int.TryParse(cabin.CabinNumber, out int cabinNo))
+            if (cabin.Type.ToLower() == "gty" && int.TryParse(cabin.CabinNumber, out int total))
             {
-                for (int i = 1; i <= cabinNo; i++)
+                foreach (var _ in Enumerable.Range(1, total))
                 {
-                    bool exists = true;
-                    while (exists)
-                    {
-                        exists = data.Any(x => x.CabinNumber == "GTY" + cabinIndex);
-                        if (!exists)
-                        {
-                            cabins.Add(new CruisePricingCabinDto
-                            {
-                                CabinNo = "GTY" + cabinIndex,
-                                Status = cabin.Status,
-                                Type = cabin.Type,
-                                CruisePricingInventoryId = data[0].CruisePricingInventoryId
-                            });
-                        }
+                    while (existing.Any(x => x.CabinNumber == $"GTY{cabinIndex}"))
                         cabinIndex++;
-                    }
+
+                    cabins.Add(new CruisePricingCabinDto
+                    {
+                        CabinNo = $"GTY{cabinIndex++}",
+                        Status = cabin.Status,
+                        Type = cabin.Type,
+                        CruisePricingInventoryId = existing.FirstOrDefault()?.CruisePricingInventoryId ?? 0
+                    });
                 }
             }
             else
@@ -321,11 +156,117 @@ namespace Marketplace.API.Controllers.Inventory
                     CabinNo = cabin.CabinNumber,
                     Status = cabin.Status,
                     Type = cabin.Type,
-                    CruisePricingInventoryId = data[0].CruisePricingInventoryId
+                    CruisePricingInventoryId = existing.FirstOrDefault()?.CruisePricingInventoryId ?? 0
                 });
             }
-
             return cabins;
         }
+
+        [HttpGet("departures-by-destination/{destinationCode}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetDeparturePortsByDestination(string destinationCode)
+        {
+            var departurePorts = await _departurePortService.GetByDestinationCodeAsync(destinationCode);
+            return Ok(departurePorts.Select(p => new { p.DeparturePortId, p.DeparturePortName }));
+        }
+
+        [HttpGet("ships-by-cruiseline/{cruiseLineId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetShipsByCruiseLine(int cruiseLineId)
+        {
+            var ships = await _cruiseShipService.GetByCruiseLineIdAsync(cruiseLineId);
+            return Ok(ships.Select(s => new { s.CruiseShipId, s.ShipName }));
+        }
+
+        [HttpGet("saildates-by-ship/{cruiseShipId}")]
+        public async Task<ActionResult<IEnumerable<SelectListItem>>> GetSailDatesByCruiseShipId(int cruiseShipId)
+        {
+            var sailDates = await _sailDateService.GetAll();
+            var result = sailDates
+                .Where(s => s.CruiseShipID == cruiseShipId)
+                .Select(s => new SelectListItem
+                {
+                    Value = s.SaleDateId.ToString(),
+                    Text = s.SailDateTime.ToString("yyyy-MM-dd HH:mm:ss")
+                })
+                .ToList();
+
+            return Ok(result);
+        }
+
+        // Dropdown enum endpoints follow the same pattern:
+        // Example for Cabin Categories:
+        [HttpGet("cabin-categories")]
+        public ActionResult<IEnumerable<object>> GetCabinCategories()
+        {
+            var categories = Enum.GetValues(typeof(CabinCategoryEnum))
+                .Cast<CabinCategoryEnum>()
+                .Select(e => new { Value = (int)e, Text = e.ToString() })
+                .ToList();
+
+            return Ok(categories);
+        }
+
+        [HttpGet("cabin-number-types")]
+        public ActionResult<IEnumerable<object>> GetCabinNumberTypes()
+        {
+            var types = Enum.GetValues(typeof(CabinNoTypeEnum))
+                .Cast<CabinNoTypeEnum>()
+                .Select(e => new { Value = (int)e, Text = e.ToString() })
+                .ToList();
+
+            return Ok(types);
+        }
+
+        [HttpGet("cabin-occupancies")]
+        public ActionResult<IEnumerable<object>> GetCabinOccupancies()
+        {
+            var occupancies = Enum.GetValues(typeof(CabinOccupancyEnum))
+                .Cast<CabinOccupancyEnum>()
+                .Select(e => new { Value = (int)e, Text = e.ToString() })
+                .ToList();
+
+            return Ok(occupancies);
+        }
+
+
+        [HttpGet("cruiselines")]
+        public async Task<IActionResult> GetCruiseLines()
+        {
+            var cruiseLines = await _cruiseLineService.GetAll();
+            return Ok(cruiseLines.Select(cl => new
+            {
+                cl.CruiseLineId,
+                cl.CruiseLineName
+            }));
+        }
+
+        [HttpGet("destinations")]
+        public async Task<IActionResult> GetDestinations()
+        {
+            var destinations = await _destinationService.GetAll();
+            return Ok(destinations.Select(d => new
+            {
+                d.DestinationCode,
+                d.DestinationName
+            }));
+        }
+
+        [HttpGet("cruiseships/{cruiseLineId}")]
+        public async Task<IActionResult> GetCruiseShipsByCruiseLine(int cruiseLineId)
+        {
+            var cruiseShips = await _context.CruiseShips
+                .Where(cs => cs.CruiseLineId == cruiseLineId)
+                .Select(cs => new
+                {
+                    cs.CruiseShipId,
+                    cs.ShipName
+                })
+                .ToListAsync();
+
+            return Ok(cruiseShips);
+        }
+
+        // NEW METHODS TO ADD
+
+        
     }
 }

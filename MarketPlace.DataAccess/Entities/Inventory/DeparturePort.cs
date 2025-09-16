@@ -27,14 +27,5 @@ namespace MarketPlace.DataAccess.Entities.Inventory
 
         [ForeignKey("DestinationCode")]
         public virtual Destination Destination { get; set; }
-
-        public int CreatedBy { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public int LastModifiedBy { get; set; }
-
-        public DateTime LastModifiedOn { get; set; }
-
     }
 }

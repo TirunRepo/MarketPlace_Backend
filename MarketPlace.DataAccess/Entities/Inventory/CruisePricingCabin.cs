@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Entities.Inventory
 {
+    [Table("CruisePricingCabin")]
     public class CruisePricingCabin
     {
         [Key]

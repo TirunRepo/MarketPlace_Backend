@@ -1,12 +1,16 @@
-﻿using MarketPlace.Business.Interfaces;
+﻿using FluentValidation;
+using MarketPlace.Business.Interfaces;
+using MarketPlace.Business.Interfaces.Inventory;
 using MarketPlace.Business.Services;
+using MarketPlace.Business.Services.Inventory;
 using MarketPlace.Common.Mapping;
 using MarketPlace.DataAccess.DBContext;
+using MarketPlace.DataAccess.Repositories.Inventory.Interface;
+using MarketPlace.DataAccess.Repositories.Inventory.Respository;
 using MarketPlace.Infrastucture.JwtTokenGenerator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using FluentValidation;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
@@ -25,7 +29,25 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtTokenGenerator>();
+builder.Services.AddScoped<IDeparturePortService, CruiseDeparturePortService>();
+builder.Services.AddScoped<ICruiseDeparturePortRepository, CruiseDeparturePortRepository>();
+builder.Services.AddScoped<IcruiseInventoryService, CruiseInventoryService>();
+builder.Services.AddScoped<ICruiseInventoryRepository, CruiseInventoryRepository>();
+builder.Services.AddScoped<ICruiseLineService, CruiseLineService>();
+builder.Services.AddScoped<ICruiseShipService, CruiseShipServices>();
+builder.Services.AddScoped<IcruiseShipRepository, CruiseShipRepository>();
+builder.Services.AddScoped<ICruiseLineService, CruiseLineService>();
+builder.Services.AddScoped<ICruiseLineRepository, CruiseLineRepository>();
+builder.Services.AddScoped<ISailDateService, SailDateService>();
+builder.Services.AddScoped<ISailDateRepository, SailDateRepository>();
+builder.Services.AddScoped<ICruisePricingInventoryService, CruisePricingInventoryService>();
+builder.Services.AddScoped<ICruisePricingInventoryRepository, CruisePricingInventoryRepository>();
 
+builder.Services.AddScoped<ICruisePricingCabinService, CruisePricingCabinService>();
+builder.Services.AddScoped<ICruisePricingCabinRepository, CruisePricingCabinRepository>();
+
+builder.Services.AddScoped<IDestinationService, CruiseDestinationService>();
+builder.Services.AddScoped<ICruiseDestinationRepository, CruiseDestinationRepository>();
 // JWT settings
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
