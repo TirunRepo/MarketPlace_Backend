@@ -26,14 +26,13 @@ namespace MarketPlace.Common.DTOs.RequestModels.Inventory
         public string? Category { get; set; }
         public string? CabinCategory { get; set; }
         public string? CabinNoType { get; set; }
-
-        // ✅ JSON string like {"C1": "Occupied", "C2": "Hold"}
-        public string? CabinNo { get; set; }
-
         public string? CabinOccupancy { get; set; }
 
-        // Optional: useful if you want to show as list in view
-        public List<string>? CabinNoList { get; set; }
+        // ✅ multiple cabins
         public virtual ICollection<CruisePricingCabinDto>? Cabins { get; set; }
+
+        public bool EnableAgent { get; set; }
+        public bool EnableAdmin { get; set; }
     }
+
 }

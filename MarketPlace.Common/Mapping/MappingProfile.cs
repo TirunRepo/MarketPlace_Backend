@@ -55,7 +55,7 @@ namespace MarketPlace.Common.Mapping
             .ForMember(dest => dest.CruiseLine, opt => opt.Ignore());
             // Entity to DTO (convert child entities to string list)
             CreateMap<CruisePricingInventory, CruisePricingInventoryDto>()
-                .ForMember(dest => dest.CabinNoList, opt => opt.MapFrom(src => src.Cabins.Select(c => c.CabinNo).ToList()));
+                .ForMember(dest => dest.CabinNoType, opt => opt.MapFrom(src => src.Cabins.Select(c => c.CabinNo).ToList()));
 
             //// DTO to Entity (convert string list to child entities)
             //CreateMap<CruisePricingInventoryDto, CruisePricingInventory>()
