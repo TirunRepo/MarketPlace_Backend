@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MarketPlace.Common")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c9916e7301bcefcaf9b5198bbf4e8fe69a011538")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88bc285a3a82a4abbb414ae811d14343a92440f1")]
 [assembly: System.Reflection.AssemblyProductAttribute("MarketPlace.Common")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MarketPlace.Common")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

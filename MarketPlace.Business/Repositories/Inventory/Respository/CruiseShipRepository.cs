@@ -63,7 +63,6 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
         public async Task<CruiseShipDto> GetById(int id)
         {
             var cruiseShip = await _context.CruiseShips
-                .Include(cs => cs.CruiseLine)
                 .FirstOrDefaultAsync(cs => cs.CruiseShipId == id);
 
             return cruiseShip == null ? null : _mapper.Map<CruiseShipDto>(cruiseShip);

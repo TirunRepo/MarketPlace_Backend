@@ -9,7 +9,7 @@ namespace MarketPlace.Common.DTOs.RequestModels.Inventory
 {
     public class CruiseLineDto
     {
-        public int? CruiseLineId { get; set; }
+        public int? CruiseLineId { get; set; } = null;
         public string? CruiseLineName { get; set; }
         public string? CruiseLineCode { get; set; }
     }

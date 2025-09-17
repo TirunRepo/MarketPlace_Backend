@@ -2,6 +2,7 @@
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.PagedData;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Marketplace.API.Controllers.CruiseShips
 {
@@ -82,15 +83,15 @@ namespace Marketplace.API.Controllers.CruiseShips
 
         // DELETE: api/Ships/5
         [HttpDelete("{id:int}")]
-        public IActionResult DeleteShip(int id)
+        public async Task<IActionResult> DeleteShip(int id)
         {
-            var ship = _cruiseShipService.GetById(id);
+            var ship = await _cruiseShipService.GetById(id);
             if (ship == null)
             {
                 return NotFound(new { status = 404, message = "Ship not found." });
             }
 
-            _cruiseShipService.Delete(id);
+            await _cruiseShipService.Delete(id);
             return Ok(new { status = 200, message = "Ship deleted successfully." });
         }
         [HttpPost("update")]

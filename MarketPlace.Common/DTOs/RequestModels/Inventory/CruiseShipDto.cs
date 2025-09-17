@@ -13,7 +13,7 @@ namespace MarketPlace.Common.DTOs.RequestModels.Inventory
         public string? ShipCode { get; set; }
         public int CruiseLineId { get; set; }
         // Bind this for dropdowns or assignment
-        public CruiseLineDto CruiseLine { get; set; }
+        public CruiseLineDto? CruiseLine { get; set; }
 
     }
 }

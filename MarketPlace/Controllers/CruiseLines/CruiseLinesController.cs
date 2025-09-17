@@ -2,6 +2,7 @@
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.PagedData;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Marketplace.API.Controllers.CruiseLines
 {
@@ -62,17 +63,17 @@ namespace Marketplace.API.Controllers.CruiseLines
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteLine(int id)
+        public async Task<IActionResult> DeleteLine(int id)
         {
             try
             {
-                var line = _cruiseLineService.GetById(id);
+                var line = await _cruiseLineService.GetById(id);
                 if (line == null)
                 {
                     return NotFound(new { Message = "Cruise line not found." });
                 }
 
-                _cruiseLineService.Delete(id);
+                await _cruiseLineService.Delete(id);
 
                 return Ok(new { Message = "Cruise line deleted successfully." });
             }
