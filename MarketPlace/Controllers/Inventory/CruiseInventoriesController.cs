@@ -53,49 +53,60 @@ namespace Marketplace.API.Controllers.Inventory
 
 
         [HttpPost]
-        public async Task<IActionResult> SaveCruiseInventory([FromBody] CruiseInventoryFormViewModel model)
+        public async Task<IActionResult> SaveCruiseInventory([FromBody] CruiseInventoryRequest model)
         {
-            if (model == null || model.CruiseInventoryDto == null)
+            if (model == null)
                 return BadRequest(new { Success = false, Message = "Inventory data is missing." });
 
             try
             {
-                model.CruiseInventoryDto.CreatedOn = DateTime.UtcNow;
-                model.CruiseInventoryDto.CreatedBy = 1; // replace with actual user id
-
-                var cruiseInventory = await _cruiseInventoryService.Insert(model.CruiseInventoryDto);
-
-                var cabins = await GenerateCabins(model);
-
-                var pricing = new CruisePricingInventoryDto
+                // Map request model to DTO
+                var cruiseInventory = new CruiseInventoryDto
                 {
-                    CruiseInventoryId = cruiseInventory.CruiseInventoryId,
-                    CabinCategory = model.CabinCategory,
-                    Category = model.CruiseInventoryDto.CategoryId,
-                    CabinOccupancy = model.cruisePricingInventoryDto?.CabinOccupancy,
-                    CabinNoType = model.cruisePricingInventoryDto?.CabinNoType,
-                    SinglePrice = model.SinglePrice,
-                    DoublePrice = model.DoublePrice,
-                    ThreeFourthPrice = model.ThreeFourthPrice,
-                    NCCF = model.NCCF,
-                    Tax = model.Tax,
-                    Grats = model.Grats,
-                    PriceValidFrom = model.PriceValidFrom,
-                    PriceValidTo = model.PriceValidTo,
-                    EnableAgent = model.EnableAgent,
-                    EnableAdmin = model.EnableAdmin,
-                    Cabins = cabins
+                    SailDate = model.SailDate,
+                    GroupId = model.GroupId,
+                    Nights = model.Nights,
+                    PackageDescription = model.PackageName,
+                  //  CategoryId = model.CategoryId, // if applicable
+                    DestinationId = model.DestinationId,
+                    DeparturePortId = model.DeparturePortId,
+                    ShipId = model.ShipId,
+                    CruiseLineId = model.CruiseLineId,
+                    CreatedOn = DateTime.UtcNow,
+                    CreatedBy = 1 // TODO: replace with logged-in user
                 };
 
-                await _cruisePricingInventoryService.Insert(pricing);
+                // Insert cruise inventory
+                var insertedInventory = await _cruiseInventoryService.Insert(cruiseInventory);
+
+                // Save cabins if any
+                if (model.Cabins != null && model.Cabins.Any())
+                {
+                    var cabins = model.Cabins.Select(c => new CruisePricingCabinDto
+                    {
+                        CruisePricingInventoryId = insertedInventory.CruiseInventoryId, // corrected FK
+                        Type = c.Type,
+                        CabinNo = c.CabinNo,
+                        Status = c.Status
+                    }).ToList();
+
+                   // await _cruisePricingInventoryService.Insert(cabins);
+                }
 
                 return Ok(new { Success = true, Message = "Cruise inventory saved successfully." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Success = false, Message = "Error saving cruise inventory.", Details = ex.Message });
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    Message = "Error saving cruise inventory.",
+                    Details = ex.Message
+                });
             }
         }
+
+
         /// <summary>
         /// Get paginated list of cruise inventories
         /// </summary>
@@ -233,62 +244,62 @@ namespace Marketplace.API.Controllers.Inventory
 
 
         // ✅ GTY + Explicit cabin generation logic
-        private async Task<List<CruisePricingCabinDto>> GenerateCabins(CruiseInventoryFormViewModel model)
-        {
-            var existingCabins = await _cruisePricingCabinService.GetAll(
-                model.CruiseInventoryDto.SailDate,
-                model.CruiseInventoryDto.CruiseShip?.CruiseShipId ?? 0,
-                model.CruiseInventoryDto.GroupId
-            );
+        //private async Task<List<CruisePricingCabinDto>> GenerateCabins(CruiseInventoryFormViewModel model)
+        //{
+        //    var existingCabins = await _cruisePricingCabinService.GetAll(
+        //        model.CruiseInventoryDto.SailDate,
+        //        model.CruiseInventoryDto.CruiseShip?.CruiseShipId ?? 0,
+        //        model.CruiseInventoryDto.GroupId
+        //    );
 
-            List<CruisePricingCabinDto> cabins = new List<CruisePricingCabinDto>();
-            int cabinIndex = 1;
+        //    List<CruisePricingCabinDto> cabins = new List<CruisePricingCabinDto>();
+        //    int cabinIndex = 1;
 
-            if (model.Cabins != null)
-            {
-                foreach (var cabin in model.Cabins)
-                {
-                    int gtyCount;
+        //    if (model.Cabins != null)
+        //    {
+        //        foreach (var cabin in model.Cabins)
+        //        {
+        //            int gtyCount;
 
-                    if (cabin.Type == "Gty" && int.TryParse(cabin.CabinNo, out gtyCount))
-                    {
-                        for (int i = 1; i <= gtyCount; i++)
-                        {
-                            bool isRecordExist = true;
+        //            if (cabin.Type == "Gty" && int.TryParse(cabin.CabinNo, out gtyCount))
+        //            {
+        //                for (int i = 1; i <= gtyCount; i++)
+        //                {
+        //                    bool isRecordExist = true;
 
-                            while (isRecordExist)
-                            {
-                                var generatedNo = "GTY" + cabinIndex.ToString();
-                                isRecordExist = existingCabins.Any(x => x.CabinNo == generatedNo);
+        //                    while (isRecordExist)
+        //                    {
+        //                        var generatedNo = "GTY" + cabinIndex.ToString();
+        //                        isRecordExist = existingCabins.Any(x => x.CabinNo == generatedNo);
 
-                                if (!isRecordExist)
-                                {
-                                    cabins.Add(new CruisePricingCabinDto
-                                    {
-                                        CabinNo = generatedNo,
-                                        Status = cabin.Status,
-                                        Type = "Gty"
-                                    });
-                                }
+        //                        if (!isRecordExist)
+        //                        {
+        //                            cabins.Add(new CruisePricingCabinDto
+        //                            {
+        //                                CabinNo = generatedNo,
+        //                                Status = cabin.Status,
+        //                                Type = "Gty"
+        //                            });
+        //                        }
 
-                                cabinIndex++;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        cabins.Add(new CruisePricingCabinDto
-                        {
-                            CabinNo = cabin.CabinNo,
-                            Status = cabin.Status,
-                            Type = cabin.Type
-                        });
-                    }
-                }
-            }
+        //                        cabinIndex++;
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                cabins.Add(new CruisePricingCabinDto
+        //                {
+        //                    CabinNo = cabin.CabinNo,
+        //                    Status = cabin.Status,
+        //                    Type = cabin.Type
+        //                });
+        //            }
+        //        }
+        //    }
 
-            return cabins;
-        }
+        //    return cabins;
+        //}
 
 
 
