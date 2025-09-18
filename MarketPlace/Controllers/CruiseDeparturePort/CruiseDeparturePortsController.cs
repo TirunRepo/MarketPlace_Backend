@@ -1,7 +1,11 @@
 ﻿using MarketPlace.Business.Interfaces.Inventory;
+using MarketPlace.Business.Services.Inventory;
+using MarketPlace.Common.APIResponse;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
 using MarketPlace.Common.PagedData;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Marketplace.API.Controllers.CruiseDeparturePort
 {
@@ -10,37 +14,40 @@ namespace Marketplace.API.Controllers.CruiseDeparturePort
     public class CruiseDeparturePortsController : ControllerBase
     {
         private readonly IDeparturePortService _departurePortService;
-        private readonly IDestinationService _destinationService;
 
         public CruiseDeparturePortsController(
             IDeparturePortService departurePortService,
             IDestinationService destinationService)
         {
             _departurePortService = departurePortService;
-            _destinationService = destinationService;
         }
 
-        // GET: api/DeparturePorts?page=1&pageSize=10
+        /// <summary>
+        /// Get List of lines
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<PagedData<DeparturePortDto>>> GetDeparturePorts(int page = 1, int pageSize = 10)
+        public async Task<ActionResult<PagedData<CruiseDeparturePortResponse>>> GetList(int page = 1, int pageSize = 10)
         {
             if (page <= 0 || pageSize <= 0)
                 return BadRequest("Page and pageSize must be greater than zero.");
 
-            var allDeparturePorts = await _departurePortService.GetAll() ?? new List<DeparturePortDto>();
+            var allCruiseLines = await _departurePortService.GetList();
 
-            var totalCount = allDeparturePorts.Count();
+            var totalCount = allCruiseLines.TotalCount;
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-            var pagedDeparturePorts = allDeparturePorts
-                .OrderBy(d => d.DeparturePortName) // stable ordering for pagination
+            var pagedCruiseLines = allCruiseLines.Items
+                .OrderBy(c => c.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
-            var result = new PagedData<DeparturePortDto>
+            var result = new PagedData<CruiseDeparturePortResponse>
             {
-                Items = pagedDeparturePorts,
+                Items = pagedCruiseLines,
                 CurrentPage = page,
                 PageSize = pageSize,
                 TotalCount = totalCount,
@@ -50,79 +57,115 @@ namespace Marketplace.API.Controllers.CruiseDeparturePort
             return Ok(result);
         }
 
-        // POST: api/DeparturePorts
+        // POST: api/CruiseLines
         [HttpPost]
-        public async Task<IActionResult> AddDeparturePort([FromBody] DeparturePortDto model)
+        public async Task<IActionResult> Add([FromBody] DeparturePortRequest model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new APIResponse<DeparturePortRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Invalid model data."
+                });
 
-            var destination = await _destinationService.GetByCode(model.DestinationCode);
-
-            if (destination == null)
-                return BadRequest(new { Message = "Invalid destination selected." });
-
-            var departurePortDto = new DeparturePortDto
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            model.RecordBase = new()
             {
-                DeparturePortId = model.DeparturePortId,
-                DeparturePortCode = model.DeparturePortCode,
-                DeparturePortName = model.DeparturePortName,
-                DestinationCode = destination.DestinationCode,
-                CreatedAt = model.CreatedAt,
-                CreatedBy = model.CreatedBy,
-                LastModifiedBy = model.LastModifiedBy,
-                LastModifiedOn = model.LastModifiedOn
+                Id = Convert.ToInt32(userId),
+                CreatedBy = User.Identity.Name.ToString(),
+                CreatedOn = DateTime.Now,
             };
+            var result = await _departurePortService.Insert(model);
 
-            var result = await _departurePortService.Insert(departurePortDto);
+            if (result != null)
+            {
+                var response = new APIResponse<DeparturePortRequest>
+                {
+                    Success = true,
+                    Data = result,
+                    Message = "Cruise line added successfully."
+                };
 
-            if (result != null && result.DeparturePortId.HasValue)
-                return CreatedAtAction(nameof(GetDeparturePorts), new { page = 1, pageSize = 10 }, result);
+                return Ok(response); // ✅ simple success response
+            }
 
-            return StatusCode(500, new { Message = "Failed to save departure port." });
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new APIResponse<DeparturePortRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Failed to add cruise line."
+                });
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult> UpdateDeparture([FromBody] DeparturePortDto departurePortDto)
+        public async Task<IActionResult> Update(int id, [FromBody] DeparturePortRequest model)
         {
-            if (departurePortDto == null)
-                return BadRequest("User data is required");
-
-            var updatedUser = await _departurePortService.Update(departurePortDto);
-            return Ok(updatedUser);
-        }
-        // DELETE: api/DeparturePorts/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDeparture(int id)
-        {
-            var departure = await _departurePortService.GetById(id);
-            if (departure == null)
+            if (model == null)
             {
-                return NotFound(new { message = "Departure port not found." });
+                return BadRequest(new APIResponse<DeparturePortRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Cruise line data is required."
+                });
             }
 
-            await _departurePortService.Delete(id);
-            return Ok(new { message = "Departure port deleted successfully." });
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new APIResponse<DeparturePortRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "User not authorized."
+                });
+            }
+
+            // ✅ set updated info
+            model.RecordBase ??= new(); // ensure not null
+            model.RecordBase.UpdatedBy = User.Identity?.Name;
+            model.RecordBase.UpdatedOn = DateTime.Now;
+            model.RecordBase.Id = Convert.ToInt32(userId);
+
+            var updated = await _departurePortService.Update(id, model);
+
+            if (updated == null)
+            {
+                return NotFound(new APIResponse<DeparturePortRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = $"Cruise line with ID {id} not found."
+                });
+            }
+
+            return Ok(new APIResponse<DeparturePortRequest>
+            {
+                Success = true,
+                Data = updated,
+                Message = "Cruise line updated successfully."
+            });
         }
 
-        // GET: api/Destination
-        [HttpGet("destination")]
-        public async Task<ActionResult<IEnumerable<DestinationDto>>> GetAllDestinations()
+
+        [HttpPost("{id}")]
+        public async Task<bool> Delete(int id)
         {
             try
             {
-                var destinations = await _destinationService.GetAll();
-
-                if (destinations == null || !destinations.Any())
+                var line = await _departurePortService.GetById(id);
+                if (line == null)
                 {
-                    return NotFound(new { Message = "No destinations found." });
+                    return false; // not found
                 }
 
-                return Ok(destinations);
+                return await _departurePortService.Delete(id); ; // deleted successfully
             }
-            catch (Exception ex)
+            catch
             {
-                return StatusCode(500, new { Message = "An error occurred while fetching destinations.", Details = ex.Message });
+                return false; // error occurred
             }
         }
 

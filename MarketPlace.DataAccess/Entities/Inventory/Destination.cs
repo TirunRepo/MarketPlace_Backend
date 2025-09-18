@@ -1,4 +1,5 @@
-﻿using MarketPlace.DataAccess.Entities;
+﻿using MarketPlace.Common.CommonModel;
+using MarketPlace.DataAccess.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,15 +10,19 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Entities.Inventory
 {
-    public class Destination : EntityBase
+    public class Destination
     {
         [Key]
+        public int Id { get; set; }
+
         [Required]
         [StringLength(50)]
-        public string DestinationCode { get; set; }  // 🔹 Primary Key
+        public required string Code { get; set; }
 
         [Required]
         [StringLength(255)]
-        public string DestinationName { get; set; }
+        public required string Name { get; set; }
+
+        public RecordBase? RecordBase { get; set; }
     }
 }

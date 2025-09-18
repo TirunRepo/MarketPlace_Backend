@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MarketPlace.Common.CommonModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,20 +9,21 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Entities.Inventory
 {
-    public class CruiseShip : EntityBase
+    public class CruiseShip
     {
         [Key]
-        public int CruiseShipId { get; set; }
+        public int Id { get; set; }
         [Required]
         [StringLength(500)]
-        public string ShipName { get; set; }
+        public required string Name { get; set; }
         [Required]
         [StringLength(50)]
-        public string ShipCode { get; set; }
+        public required string Code { get; set; }
 
         [Required]
-        public int CruiseLineId { get; set; }  // FK
         [ForeignKey("CruiseLineId")]
-        public virtual CruiseLine CruiseLine { get; set; }
+        public int CruiseLineId { get; set; } 
+
+        public RecordBase? Record { get; set; }
     }
 }

@@ -25,4 +25,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MarketPlace.Common\MarketPlace.Common.csproj" />
+  </ItemGroup>
+
 </Project>

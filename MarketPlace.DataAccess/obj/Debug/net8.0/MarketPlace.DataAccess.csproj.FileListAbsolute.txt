@@ -462,3 +462,10 @@ C:\MarketPlace_Backend\MarketPlace.DataAccess\obj\Debug\net8.0\refint\MarketPlac
 C:\MarketPlace_Backend\MarketPlace.DataAccess\obj\Debug\net8.0\MarketPlace.DataAccess.pdb
 C:\MarketPlace_Backend\MarketPlace.DataAccess\obj\Debug\net8.0\MarketPlace.DataAccess.genruntimeconfig.cache
 C:\MarketPlace_Backend\MarketPlace.DataAccess\obj\Debug\net8.0\ref\MarketPlace.DataAccess.dll
+C:\MarketPlace_Backend\MarketPlace.DataAccess\bin\Debug\net8.0\MarketPlace.Common.deps.json
+C:\MarketPlace_Backend\MarketPlace.DataAccess\bin\Debug\net8.0\MarketPlace.Common.runtimeconfig.json
+C:\MarketPlace_Backend\MarketPlace.DataAccess\bin\Debug\net8.0\MarketPlace.Common.exe
+C:\MarketPlace_Backend\MarketPlace.DataAccess\bin\Debug\net8.0\AutoMapper.dll
+C:\MarketPlace_Backend\MarketPlace.DataAccess\bin\Debug\net8.0\FluentValidation.dll
+C:\MarketPlace_Backend\MarketPlace.DataAccess\bin\Debug\net8.0\MarketPlace.Common.dll
+C:\MarketPlace_Backend\MarketPlace.DataAccess\bin\Debug\net8.0\MarketPlace.Common.pdb

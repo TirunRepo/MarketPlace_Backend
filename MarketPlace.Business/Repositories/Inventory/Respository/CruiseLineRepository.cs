@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
+using MarketPlace.Common.PagedData;
 using MarketPlace.DataAccess.DBContext;
 using MarketPlace.DataAccess.Entities.Inventory;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
@@ -23,41 +25,41 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<CruiseLineDto> Insert(CruiseLineDto cruiseLineDto)
+        public async Task<CruiseLineRequest> Insert(CruiseLineRequest model)
         {
-            var entity = _mapper.Map<CruiseLine>(cruiseLineDto);
+            var entity = _mapper.Map<CruiseLine>(model);
             _context.CruiseLines.Add(entity);
             await _context.SaveChangesAsync();
-            return _mapper.Map<CruiseLineDto>(entity);
+            return _mapper.Map<CruiseLineRequest>(entity);
         }
 
-        public async Task<CruiseLineDto> Update(CruiseLineDto cruiseLineDto)
+        public async Task<CruiseLineRequest> Update(int Id, CruiseLineRequest model)
         {
-            var entity = await _context.CruiseLines.FindAsync(cruiseLineDto.CruiseLineId);
+            var entity = await _context.CruiseLines.FindAsync(Id);
             if (entity == null) throw new KeyNotFoundException("Cruise line not found");
-
-            _mapper.Map(cruiseLineDto, entity);
+            
+            _mapper.Map(model, entity);
             await _context.SaveChangesAsync();
-            return _mapper.Map<CruiseLineDto>(entity);
+            return _mapper.Map<CruiseLineRequest>(entity);
         }
 
-        public async Task<CruiseLineDto> GetById(int cruiseLineId)
+        public async Task<CruiseLineModal> GetById(int Id)
         {
-            var entity = await _context.CruiseLines.FindAsync(cruiseLineId);
-            return entity == null ? null : _mapper.Map<CruiseLineDto>(entity);
+            var entity = await _context.CruiseLines.FindAsync(Id);
+            return entity == null ? null : _mapper.Map<CruiseLineModal>(entity);
         }
 
-        public async Task<IEnumerable<CruiseLineDto>> GetAll()
+        public async Task<PagedData<CruiseLineResponse>> GetList()
         {
             var cruiseLines = await _context.CruiseLines.ToListAsync();
-            return _mapper.Map<IEnumerable<CruiseLineDto>>(cruiseLines);
+            return _mapper.Map<PagedData<CruiseLineResponse>>(cruiseLines);
         }
 
-        public async Task<bool> Delete(int cruiseLineId)
+        public async Task<bool> Delete(int Id)
         {
             try
             {
-                var entity = await _context.CruiseLines.FindAsync(cruiseLineId);
+                var entity = await _context.CruiseLines.FindAsync(Id);
                 if (entity == null) return false;
 
                 _context.CruiseLines.Remove(entity);
@@ -66,7 +68,6 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }

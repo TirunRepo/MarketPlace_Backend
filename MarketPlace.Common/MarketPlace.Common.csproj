@@ -9,12 +9,9 @@
 
   <ItemGroup>
 	  <PackageReference Include="AutoMapper" Version="14.0.0" />
+	  <PackageReference Include="FluentValidation" Version="12.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.9" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\MarketPlace.DataAccess\MarketPlace.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

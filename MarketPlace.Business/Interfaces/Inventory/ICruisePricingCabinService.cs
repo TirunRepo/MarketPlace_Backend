@@ -7,11 +7,8 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.Business.Interfaces.Inventory
 {
-    public interface ICruisePricingCabinService
+    public interface ICruiseCabinPricingService
     {
-        Task<IEnumerable<CruisePricingCabinDto>> GetAll(DateTime sailDate, int cruiseShipId, string groupId);
-        Task<List<CruiseCabinDto>> GetCruiseCabinAsyn();
-        Task UpdateCabinAsync(int id, string cabinNumber, string categoryId);
-        Task InsertCabinsAsync(List<CruisePricingCabinDto> cabinDtos);
+        Task<bool> InsertCabinsAsync(CruiseInventoryRequest model);
     }
 }

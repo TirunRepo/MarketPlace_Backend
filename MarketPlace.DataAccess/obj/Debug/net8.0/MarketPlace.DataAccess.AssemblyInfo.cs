@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MarketPlace.DataAccess")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ac4b59d22e5b8d3bcc3349feba09bae145eb2de8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9da94846df2f632c5e6505508a11998a98b3e69a")]
 [assembly: System.Reflection.AssemblyProductAttribute("MarketPlace.DataAccess")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MarketPlace.DataAccess")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,5 +1,7 @@
 ﻿using MarketPlace.Business.Interfaces.Inventory;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
+using MarketPlace.Common.PagedData;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
 using System;
 using System.Collections.Generic;
@@ -17,30 +19,29 @@ namespace MarketPlace.Business.Services.Inventory
         {
             _destinationRepository = destinationRepository ?? throw new ArgumentNullException(nameof(destinationRepository));
         }
-
-        public async Task<IEnumerable<DestinationDto>> GetAll()
+        public async Task<PagedData<DestinationResponse>> GetList()
         {
-            return await _destinationRepository.GetAll();
+            return await _destinationRepository.GetList();
         }
 
-        public async Task<DestinationDto> GetByCode(string code)
+        public async Task<DestinationResponse> GetById(int id)
         {
-            return await _destinationRepository.GetByCode(code);
+            return await _destinationRepository.GetById(id);
         }
 
-        public async Task<DestinationDto> Insert(DestinationDto destinationDto)
+        public async Task<DestinationRequest> Insert(DestinationRequest model)
         {
-            return await _destinationRepository.Insert(destinationDto);
+            return await _destinationRepository.Insert(model);
         }
 
-        public async Task<DestinationDto> Update(DestinationDto destinationDto)
+        public async Task<DestinationRequest> Update(int Id, DestinationRequest model)
         {
-            return await _destinationRepository.Update(destinationDto);
+            return await _destinationRepository.Update(Id, model);
         }
 
-        public async Task<bool> Delete(string code)
+        public async Task<bool> Delete(int id)
         {
-            return await _destinationRepository.Delete(code);
+            return await _destinationRepository.Delete(id);
         }
     }
 }

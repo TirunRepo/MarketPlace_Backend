@@ -1,4 +1,5 @@
-﻿using MarketPlace.DataAccess.Entities;
+﻿using MarketPlace.Common.CommonModel;
+using MarketPlace.DataAccess.Entities;
 using MarketPlace.DataAccess.Entities.Inventory;
 using MarketPlace.DataAccess.Entities.Markup;
 using MarketPlace.DataAccess.Entities.Promotions;
@@ -10,21 +11,30 @@ namespace MarketPlace.DataAccess.DBContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> opts) : base(opts) { }
 
+        //Users
         public DbSet<User> Users { get; set; } = null!;
-        public DbSet<PromotionModel> Promotions { get; set; }
-        public DbSet<MarkupDetail> MarkupDetails { get; set; }
-
-        public DbSet<CruiseLine> CruiseLines { get; set; }
-        public DbSet<CruiseShip> CruiseShips { get; set; }
-        public DbSet<Destination> Destinations { get; set; }
-        public DbSet<DeparturePort> DeparturePorts { get; set; }
+        //Inventory
         public DbSet<CruiseInventory> CruiseInventories { get; set; }
-        public DbSet<CruisePricingInventory> CruisePricingInventories { get; set; }
-        public DbSet<SailDate> SailDates { get; set; }
-        public DbSet<CruisePricingCabin> Cabins { get; set; }
+        //CruiseCabinPricingInventory
+        public DbSet<CruiseCabinPricingInventory> CruiseCabinPricingInventories { get; set; }
+        //DeparturePort
+        public DbSet<DeparturePort> DeparturePorts { get; set; }
+        //Destination
+        public DbSet<Destination> Destinations { get; set; }
+        //CruiseLines
+        public DbSet<CruiseLine> CruiseLines { get; set; }
+        //CruiseShips
+        public DbSet<CruiseShip> CruiseShips { get; set; }
+        //Promotion
+        public DbSet<PromotionModel> Promotions { get; set; }
+        //MarupDetails
+        public DbSet<MarkupDetail> MarkupDetails { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);           
+            modelBuilder.Ignore<RecordBase>();
+            modelBuilder.Ignore<CruiseCabinDetails>();
+            base.OnModelCreating(modelBuilder);
+
         }
     }
 }

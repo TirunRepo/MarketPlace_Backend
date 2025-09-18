@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
+using MarketPlace.Common.PagedData;
 using MarketPlace.DataAccess.DBContext;
 using MarketPlace.DataAccess.Entities.Inventory;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
@@ -12,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
 {
-    public class CruiseShipRepository : IcruiseShipRepository
+    public class CruiseShipRepository : ICruiseShipRepository
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
@@ -23,35 +25,28 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<CruiseShipDto> Insert(CruiseShipDto cruiseShipDto)
+        public async Task<CruiseShipRequest> Insert(CruiseShipRequest model)
         {
-            var cruiseShip = _mapper.Map<CruiseShip>(cruiseShipDto);
-
-            // Attach CruiseLine if needed (avoid tracking issues)
-            if (cruiseShip.CruiseLine != null)
-            {
-                _context.Attach(cruiseShip.CruiseLine);
-            }
-
+            var cruiseShip = _mapper.Map<CruiseShip>(model);
             _context.CruiseShips.Add(cruiseShip);
             await _context.SaveChangesAsync();
-            return _mapper.Map<CruiseShipDto>(cruiseShip);
+            return _mapper.Map<CruiseShipRequest>(cruiseShip);
         }
 
-        public async Task<CruiseShipDto> Update(CruiseShipDto cruiseShipDto)
+        public async Task<CruiseShipRequest> Update(int Id,CruiseShipRequest model)
         {
             try
             {
                 var cruiseShip = await _context.CruiseShips
-                        .Include(cs => cs.CruiseLine)
-                        .FirstOrDefaultAsync(cs => cs.CruiseShipId == cruiseShipDto.CruiseShipId);
+                        .Include(cs => cs.Id)
+                        .FirstOrDefaultAsync(cs => cs.Id == Id);
 
                 if (cruiseShip == null)
                     throw new KeyNotFoundException("Cruise ship not found");
 
-                _mapper.Map(cruiseShipDto, cruiseShip);
+                _mapper.Map(model, cruiseShip);
                 await _context.SaveChangesAsync();
-                return _mapper.Map<CruiseShipDto>(cruiseShip);
+                return _mapper.Map<CruiseShipRequest>(cruiseShip);
             }
             catch (Exception ex)
             {
@@ -60,21 +55,32 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
             }
         }
 
-        public async Task<CruiseShipDto> GetById(int id)
+        public async Task<CruiseShipReponse> GetById(int id)
         {
             var cruiseShip = await _context.CruiseShips
-                .FirstOrDefaultAsync(cs => cs.CruiseShipId == id);
+                .FirstOrDefaultAsync(cs => cs.Id == id);
 
-            return cruiseShip == null ? null : _mapper.Map<CruiseShipDto>(cruiseShip);
+            return cruiseShip == null ? null : _mapper.Map<CruiseShipReponse>(cruiseShip);
         }
-
-        public async Task<IEnumerable<CruiseShipDto>> GetAll()
+        public async Task<PagedData<CruiseShipReponse>> GetList(int page = 1, int pageSize = 10)
         {
-            var cruiseShips = await _context.CruiseShips
-                .Include(cs => cs.CruiseLine)
+            var query = _context.CruiseShips.AsQueryable();
+
+            var totalCount = await query.CountAsync();
+
+            var cruiseShips = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return _mapper.Map<IEnumerable<CruiseShipDto>>(cruiseShips);
+            var mappedShips = _mapper.Map<List<CruiseShipReponse>>(cruiseShips);
+
+            return new PagedData<CruiseShipReponse>
+            {
+                Items = mappedShips,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
         }
 
         public async Task<bool> Delete(int id)
@@ -85,14 +91,6 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
             _context.CruiseShips.Remove(cruiseShip);
             await _context.SaveChangesAsync();
             return true;
-        }
-
-
-        public async Task<IEnumerable<CruiseShip>> GetByCruiseLineIdAsync(int cruiseLineId)
-        {
-            return await _context.CruiseShips
-                .Where(s => s.CruiseLineId == cruiseLineId)
-                .ToListAsync();
         }
     }
 }

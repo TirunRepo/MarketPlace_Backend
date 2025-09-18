@@ -1,4 +1,6 @@
 ﻿using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
+using MarketPlace.Common.PagedData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +11,10 @@ namespace MarketPlace.Business.Interfaces.Inventory
 {
     public interface IDestinationService
     {
-        Task<IEnumerable<DestinationDto>> GetAll();
-        Task<DestinationDto> GetByCode(string code);
-        Task<DestinationDto> Insert(DestinationDto destinationdto);
-        Task<DestinationDto> Update(DestinationDto destinationdto);
-        Task<bool> Delete(string code);
+        Task<PagedData<DestinationResponse>> GetList();
+        Task<DestinationResponse> GetById(int id);
+        Task<DestinationRequest> Insert(DestinationRequest portDto);
+        Task<DestinationRequest> Update(int Id, DestinationRequest portDto);
+        Task<bool> Delete(int id);
     }
 }

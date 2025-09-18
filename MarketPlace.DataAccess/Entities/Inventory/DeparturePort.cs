@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MarketPlace.Common.CommonModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,24 +9,22 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Entities.Inventory
 {
-    public class DeparturePort : EntityBase
+    public class DeparturePort
     {
         [Key]
-        public int DeparturePortId { get; set; }  // 🔹 New Primary Key
+        public int Id { get; set; }  // 🔹 New Primary Key
 
         [Required]
         [StringLength(50)]
-        public string DeparturePortCode { get; set; }
+        public required string Code { get; set; }
 
         [Required]
         [StringLength(255)]
-        public string DeparturePortName { get; set; }
+        public required string Name { get; set; }
 
         [Required]
-        [StringLength(50)]
-        public string DestinationCode { get; set; }  //  The actual FK property
-
-        [ForeignKey("DestinationCode")]
-        public virtual Destination Destination { get; set; }
+        [ForeignKey("DestinationId")]
+        public required string DestinationId { get; set; }  //  The actual FK property
+        public RecordBase? RecordBase { get; set; }
     }
 }

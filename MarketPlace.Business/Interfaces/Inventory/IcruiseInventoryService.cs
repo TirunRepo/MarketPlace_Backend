@@ -1,4 +1,5 @@
-﻿using MarketPlace.Common.DTOs.RequestModels.Inventory;
+﻿using MarketPlace.Common.APIResponse;
+using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +8,8 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.Business.Interfaces.Inventory
 {
-    public interface IcruiseInventoryService
+    public interface ICruiseInventoryService
     {
-        Task<IEnumerable<CruiseInventoryDto>> GetAll();
-        Task<CruiseInventoryDto> GetById(int id);
-        Task<CruiseInventoryDto> Insert(CruiseInventoryDto InventoryDto);
-        Task<CruiseInventoryDto> Update(CruiseInventoryDto InventoryDto);
-        Task<bool> Delete(int id);
+        Task<CruiseInventoryModel> Insert(CruiseInventoryRequest model);
     }
 }

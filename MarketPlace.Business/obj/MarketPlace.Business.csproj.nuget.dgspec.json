@@ -121,11 +121,7 @@
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
-            "projectReferences": {
-              "C:\\MarketPlace_Backend\\MarketPlace.DataAccess\\MarketPlace.DataAccess.csproj": {
-                "projectPath": "C:\\MarketPlace_Backend\\MarketPlace.DataAccess\\MarketPlace.DataAccess.csproj"
-              }
-            }
+            "projectReferences": {}
           }
         },
         "warningProperties": {
@@ -147,6 +143,10 @@
             "AutoMapper": {
               "target": "Package",
               "version": "[14.0.0, )"
+            },
+            "FluentValidation": {
+              "target": "Package",
+              "version": "[12.0.0, )"
             },
             "Microsoft.Extensions.Configuration.Abstractions": {
               "target": "Package",
@@ -204,7 +204,11 @@
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
-            "projectReferences": {}
+            "projectReferences": {
+              "C:\\MarketPlace_Backend\\MarketPlace.Common\\MarketPlace.Common.csproj": {
+                "projectPath": "C:\\MarketPlace_Backend\\MarketPlace.Common\\MarketPlace.Common.csproj"
+              }
+            }
           }
         },
         "warningProperties": {

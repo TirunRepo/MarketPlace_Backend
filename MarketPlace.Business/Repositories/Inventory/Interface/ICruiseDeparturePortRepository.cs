@@ -1,4 +1,6 @@
 ﻿using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
+using MarketPlace.Common.PagedData;
 using MarketPlace.DataAccess.Entities.Inventory;
 using System;
 using System.Collections.Generic;
@@ -10,11 +12,10 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Interface
 {
     public interface ICruiseDeparturePortRepository
     {
-        Task<DeparturePortDto> Insert(DeparturePortDto departurePortDto);
-        Task<DeparturePortDto> Update(DeparturePortDto departurePortDto);
+        Task<DeparturePortRequest> Insert(DeparturePortRequest model);
+        Task<DeparturePortRequest> Update(int Id, DeparturePortRequest model);
         Task<bool> Delete(int id);
-        Task<IEnumerable<DeparturePortDto>> GetAll();
-        Task<DeparturePortDto> GetById(int id);
-        Task<IEnumerable<DeparturePort>> GetByDestinationCodeAsync(string destinationCode);
+        Task<PagedData<CruiseDeparturePortResponse>> GetList();
+        Task<CruiseDeparturePortResponse> GetById(int id);
     }
 }

@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
+using MarketPlace.Common.PagedData;
 using MarketPlace.DataAccess.DBContext;
 using MarketPlace.DataAccess.Entities.Inventory;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
@@ -18,38 +20,31 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<DeparturePortDto> Insert(DeparturePortDto departurePortDto)
+        public async Task<DeparturePortRequest> Insert(DeparturePortRequest model)
         {
-            var entity = _mapper.Map<DeparturePort>(departurePortDto);
+            var entity = _mapper.Map<DeparturePort>(model);
 
-            // Audit fields (replace with actual user ID handling as needed)
-            entity.CreatedOn = DateTime.UtcNow;
-            entity.LastModifiedOn = DateTime.UtcNow;
-            entity.CreatedBy = 1;
-            entity.ModifiedBy = 1;
 
             _context.DeparturePorts.Add(entity);
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<DeparturePortDto>(entity);
+            return _mapper.Map<DeparturePortRequest>(entity);
         }
 
-        public async Task<DeparturePortDto> Update(DeparturePortDto departurePortDto)
+        public async Task<DeparturePortRequest> Update(int Id, DeparturePortRequest model)
         {
             var existing = await _context.DeparturePorts
-                .Include(dp => dp.Destination)
-                .FirstOrDefaultAsync(dp => dp.DeparturePortId == departurePortDto.DeparturePortId);
+                .Include(dp => dp.Id)
+                .FirstOrDefaultAsync(dp => dp.Id == Id);
 
             if (existing == null)
                 throw new KeyNotFoundException("Departure Port not found");
 
-            _mapper.Map(departurePortDto, existing);
-            existing.LastModifiedOn = DateTime.UtcNow;
-            existing.ModifiedBy = 1;
+            _mapper.Map(model, existing);
 
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<DeparturePortDto>(existing);
+            return _mapper.Map<DeparturePortRequest>(existing);
         }
 
 
@@ -63,42 +58,22 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
             return true;
         }
 
-        public async Task<IEnumerable<DeparturePortDto>> GetAll()
+        public async Task<PagedData<CruiseDeparturePortResponse>> GetList()
         {
-            var ports = await _context.DeparturePorts
-                .Include(dp => dp.Destination).Select(x => new DeparturePortDto
-                {
-                    DeparturePortId = x.DeparturePortId,
-                    DeparturePortCode = x.DeparturePortCode,
-                    DestinationCode = x.DestinationCode,
-                    DeparturePortName = x.DeparturePortName,
-                    DestinationCodeObj = new DestinationDto
-                    {
-                        DestinationCode = x.DestinationCode,
-                        DestinationName = x.Destination.DestinationName
-                    },
-                    CreatedAt = x.CreatedOn,
-                    CreatedBy = x.CreatedBy
-                })
-                .ToListAsync();
 
-            return _mapper.Map<IEnumerable<DeparturePortDto>>(ports);
+            var departurePort = await _context.DeparturePorts.ToListAsync();
+
+            return _mapper.Map<PagedData<CruiseDeparturePortResponse>>(departurePort);
         }
 
-        public async Task<DeparturePortDto> GetById(int id)
+        public async Task<CruiseDeparturePortResponse> GetById(int id)
         {
             var port = await _context.DeparturePorts
-                .Include(dp => dp.Destination)
-                .FirstOrDefaultAsync(dp => dp.DeparturePortId == id);
+                .Include(dp => dp.DestinationId)
+                .FirstOrDefaultAsync(dp => dp.Id == id);
 
-            return port == null ? null : _mapper.Map<DeparturePortDto>(port);
+            return port == null ? null : _mapper.Map<CruiseDeparturePortResponse>(port);
         }
 
-        public async Task<IEnumerable<DeparturePort>> GetByDestinationCodeAsync(string destinationCode)
-        {
-            return await _context.DeparturePorts
-                                 .Where(p => p.DestinationCode == destinationCode)
-                                 .ToListAsync();
-        }
     }
 }

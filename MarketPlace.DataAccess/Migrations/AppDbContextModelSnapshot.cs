@@ -22,22 +22,65 @@ namespace MarketPlace.DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruiseInventory", b =>
+            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruiseCabinPricingInventory", b =>
                 {
-                    b.Property<int>("CruiseInventoryId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CruiseInventoryId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AgencyID")
+                    b.Property<int>("CommisionRate")
                         .HasColumnType("int");
 
-                    b.Property<int>("CreatedBy")
+                    b.Property<int>("CruiseInventoryId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
+                    b.Property<decimal?>("DoublePrice")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("Grats")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("Nccf")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("PricingType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("SinglePrice")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("TriplePrice")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CruiseCabinPricingInventories");
+                });
+
+            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruiseInventory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CabinOccupancy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CategoryId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CruiseLineId")
+                        .HasColumnType("int");
 
                     b.Property<int>("CruiseShipId")
                         .HasColumnType("int");
@@ -45,26 +88,25 @@ namespace MarketPlace.DataAccess.Migrations
                     b.Property<int>("DeparturePortId")
                         .HasColumnType("int");
 
-                    b.Property<string>("DestinationCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("DestinationId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("EnableAdmin")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EnableAgent")
+                        .HasColumnType("bit");
 
                     b.Property<string>("GroupId")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("LastModifiedOn")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Nights")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ModifiedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Nights")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PackageDescription")
+                    b.Property<string>("Package")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -72,279 +114,116 @@ namespace MarketPlace.DataAccess.Migrations
                     b.Property<DateTime>("SailDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("CruiseInventoryId");
+                    b.Property<string>("ShipCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("CruiseShipId");
+                    b.Property<string>("Stateroom")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("DeparturePortId");
-
-                    b.HasIndex("DestinationCode");
+                    b.HasKey("Id");
 
                     b.ToTable("CruiseInventories");
                 });
 
             modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruiseLine", b =>
                 {
-                    b.Property<int>("CruiseLineId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CruiseLineId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CruiseLineCode")
+                    b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("CruiseLineName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<DateTime?>("LastModifiedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifiedBy")
-                        .HasColumnType("int");
-
-                    b.HasKey("CruiseLineId");
+                    b.HasKey("Id");
 
                     b.ToTable("CruiseLines");
                 });
 
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruisePricingCabin", b =>
+            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruiseShip", b =>
                 {
-                    b.Property<int>("CruisePricingCabinId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CruisePricingCabinId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CabinNo")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("CruisePricingInventoryId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
+                    b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("CruisePricingCabinId");
-
-                    b.HasIndex("CruisePricingInventoryId");
-
-                    b.ToTable("CruisePricingCabin");
-                });
-
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruisePricingInventory", b =>
-                {
-                    b.Property<int>("CruisePricingInventoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CruisePricingInventoryId"));
-
-                    b.Property<string>("CabinCategory")
-                        .IsRequired()
-                        .HasMaxLength(55)
-                        .HasColumnType("nvarchar(55)");
-
-                    b.Property<string>("CabinOccupancy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CruiseInventoryId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("DoublePrice")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<decimal>("Grats")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<decimal>("NCCF")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<DateTime>("PriceValidFrom")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("PriceValidTo")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("SinglePrice")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<decimal>("Tax")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<decimal?>("ThreeFourthPrice")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.HasKey("CruisePricingInventoryId");
-
-                    b.HasIndex("CruiseInventoryId");
-
-                    b.ToTable("CruisePricingInventories");
-                });
-
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruiseShip", b =>
-                {
-                    b.Property<int>("CruiseShipId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CruiseShipId"));
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("CruiseLineId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("LastModifiedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifiedBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ShipCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ShipName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.HasKey("CruiseShipId");
-
-                    b.HasIndex("CruiseLineId");
+                    b.HasKey("Id");
 
                     b.ToTable("CruiseShips");
                 });
 
             modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.DeparturePort", b =>
                 {
-                    b.Property<int>("DeparturePortId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeparturePortId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeparturePortCode")
+                    b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("DeparturePortName")
+                    b.Property<string>("DestinationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("DestinationCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("LastModifiedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifiedBy")
-                        .HasColumnType("int");
-
-                    b.HasKey("DeparturePortId");
-
-                    b.HasIndex("DestinationCode");
+                    b.HasKey("Id");
 
                     b.ToTable("DeparturePorts");
                 });
 
             modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.Destination", b =>
                 {
-                    b.Property<string>("DestinationCode")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DestinationName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<DateTime?>("LastModifiedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifiedBy")
-                        .HasColumnType("int");
-
-                    b.HasKey("DestinationCode");
+                    b.HasKey("Id");
 
                     b.ToTable("Destinations");
-                });
-
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.SailDate", b =>
-                {
-                    b.Property<int>("SaleDateId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SaleDateId"));
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CruiseShipId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModifiedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifiedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SailDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("SaleDateId");
-
-                    b.HasIndex("CruiseShipId");
-
-                    b.ToTable("SailDates");
                 });
 
             modelBuilder.Entity("MarketPlace.DataAccess.Entities.Markup.MarkupDetail", b =>
@@ -593,88 +472,6 @@ namespace MarketPlace.DataAccess.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruiseInventory", b =>
-                {
-                    b.HasOne("MarketPlace.DataAccess.Entities.Inventory.CruiseShip", "CruiseShip")
-                        .WithMany()
-                        .HasForeignKey("CruiseShipId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MarketPlace.DataAccess.Entities.Inventory.DeparturePort", "DeparturePort")
-                        .WithMany()
-                        .HasForeignKey("DeparturePortId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MarketPlace.DataAccess.Entities.Inventory.Destination", "Destination")
-                        .WithMany()
-                        .HasForeignKey("DestinationCode")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CruiseShip");
-
-                    b.Navigation("DeparturePort");
-
-                    b.Navigation("Destination");
-                });
-
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruisePricingCabin", b =>
-                {
-                    b.HasOne("MarketPlace.DataAccess.Entities.Inventory.CruisePricingInventory", "CruisePricingInventory")
-                        .WithMany("Cabins")
-                        .HasForeignKey("CruisePricingInventoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CruisePricingInventory");
-                });
-
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruisePricingInventory", b =>
-                {
-                    b.HasOne("MarketPlace.DataAccess.Entities.Inventory.CruiseInventory", "CruiseInventory")
-                        .WithMany()
-                        .HasForeignKey("CruiseInventoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CruiseInventory");
-                });
-
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruiseShip", b =>
-                {
-                    b.HasOne("MarketPlace.DataAccess.Entities.Inventory.CruiseLine", "CruiseLine")
-                        .WithMany()
-                        .HasForeignKey("CruiseLineId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CruiseLine");
-                });
-
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.DeparturePort", b =>
-                {
-                    b.HasOne("MarketPlace.DataAccess.Entities.Inventory.Destination", "Destination")
-                        .WithMany()
-                        .HasForeignKey("DestinationCode")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Destination");
-                });
-
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.SailDate", b =>
-                {
-                    b.HasOne("MarketPlace.DataAccess.Entities.Inventory.CruiseShip", "CruiseShip")
-                        .WithMany()
-                        .HasForeignKey("CruiseShipId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CruiseShip");
-                });
-
             modelBuilder.Entity("MarketPlace.DataAccess.Entities.Promotions.PromotionModel", b =>
                 {
                     b.HasOne("MarketPlace.DataAccess.Entities.Promotions.PromotionType", "PromotionType")
@@ -684,11 +481,6 @@ namespace MarketPlace.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("PromotionType");
-                });
-
-            modelBuilder.Entity("MarketPlace.DataAccess.Entities.Inventory.CruisePricingInventory", b =>
-                {
-                    b.Navigation("Cabins");
                 });
 #pragma warning restore 612, 618
         }

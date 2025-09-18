@@ -1,5 +1,7 @@
 ﻿using MarketPlace.Business.Interfaces.Inventory;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
+using MarketPlace.Common.PagedData;
 using MarketPlace.DataAccess.Entities.Inventory;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
 using System;
@@ -14,44 +16,37 @@ namespace MarketPlace.Business.Services.Inventory
     public class CruiseShipServices : ICruiseShipService
     {
 
-        private readonly IcruiseShipRepository _cruiseShipRepository;
+        private readonly ICruiseShipRepository _cruiseShipRepository;
 
-        public CruiseShipServices(IcruiseShipRepository cruiseShipRepository)
+        public CruiseShipServices(ICruiseShipRepository cruiseShipRepository)
         {
             _cruiseShipRepository = cruiseShipRepository ?? throw new ArgumentNullException(nameof(cruiseShipRepository));
         }
 
-        public async Task<CruiseShipDto> Insert(CruiseShipDto cruiseShipDto)
+        public async Task<CruiseShipRequest> Insert(CruiseShipRequest model)
         {
-            return await _cruiseShipRepository.Insert(cruiseShipDto);
+            return await _cruiseShipRepository.Insert(model);
         }
 
-        public async Task<CruiseShipDto> Update(CruiseShipDto cruiseShipDto)
+        public async Task<CruiseShipRequest> Update(int Id, CruiseShipRequest model)
         {
-            return await _cruiseShipRepository.Update(cruiseShipDto);
+            return await _cruiseShipRepository.Update(Id,model);
         }
 
-        public async Task<CruiseShipDto> GetById(int cruiseShipId)
+        public async Task<CruiseShipReponse> GetById(int Id)
         {
-            return await _cruiseShipRepository.GetById(cruiseShipId);
+            return await _cruiseShipRepository.GetById(Id);
         }
 
-        public async Task<IEnumerable<CruiseShipDto>> GetAll()
+        public async Task<PagedData<CruiseShipReponse>>GetList(int page, int pageSize)
         {
-            return await _cruiseShipRepository.GetAll();
+            return await _cruiseShipRepository.GetList(page, pageSize);
         }
 
-        public async Task<bool> Delete(int cruiseShipId)
+        public async Task<bool> Delete(int Id)
         {
-            return await _cruiseShipRepository.Delete(cruiseShipId);
+            return await _cruiseShipRepository.Delete(Id);
         }
-        public async Task<IEnumerable<CruiseShip>> GetByCruiseLineIdAsync(int cruiseLineId)
-        {
-            return await _cruiseShipRepository.GetByCruiseLineIdAsync(cruiseLineId);
-
-        }
-
-
 
     }
 }

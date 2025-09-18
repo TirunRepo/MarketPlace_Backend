@@ -1,5 +1,8 @@
 ﻿using MarketPlace.Business.Interfaces.Inventory;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
+using MarketPlace.Common.PagedData;
+using MarketPlace.DataAccess.Entities.Inventory;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
 using System;
 using System.Collections.Generic;
@@ -20,30 +23,30 @@ namespace MarketPlace.Business.Services.Inventory
 
 
 
-        public async Task<CruiseLineDto> Insert(CruiseLineDto cruiselineDto)
+        public async Task<CruiseLineRequest> Insert(CruiseLineRequest model)
         {
-            return await _cruiselineRepository.Insert(cruiselineDto);
+            return await _cruiselineRepository.Insert(model);
         }
 
 
-        public async Task<CruiseLineDto> Update(CruiseLineDto cruiselineDto)
+        public async Task<CruiseLineRequest> Update(int Id, CruiseLineRequest model)
         {
-            return await _cruiselineRepository.Update(cruiselineDto);
+            return await _cruiselineRepository.Update(Id,model);
         }
 
-        public async Task<CruiseLineDto> GetById(int CruiseLineId)
+        public async Task<CruiseLineModal> GetById(int Id)
         {
-            return await _cruiselineRepository.GetById(CruiseLineId);
+            return await _cruiselineRepository.GetById(Id);
         }
 
-        public async Task<IEnumerable<CruiseLineDto>> GetAll()
+        public async Task<PagedData<CruiseLineResponse>> GetList()
         {
-            return await _cruiselineRepository.GetAll();
+            return await _cruiselineRepository.GetList();
         }
 
-        public async Task<bool> Delete(int CruiseLineId)
+        public async Task<bool> Delete(int id)
         {
-            return await _cruiselineRepository.Delete(CruiseLineId);
+            return await _cruiselineRepository.Delete(id);
         }
 
 

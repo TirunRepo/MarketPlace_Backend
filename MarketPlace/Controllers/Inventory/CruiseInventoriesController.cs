@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using MarketPlace.Business.Interfaces.Inventory;
+using MarketPlace.Business.Services.Inventory;
+using MarketPlace.Common.APIResponse;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.Types.Inventory;
 using MarketPlace.DataAccess.DBContext;
@@ -19,23 +21,19 @@ namespace Marketplace.API.Controllers.Inventory
         private readonly IMapper _mapper;
         private readonly IDeparturePortService _departurePortService;
         private readonly ICruiseShipService _cruiseShipService;
-        private readonly IcruiseInventoryService _cruiseInventoryService;
+        private readonly ICruiseInventoryService _cruiseInventoryService;
         private readonly ICruiseLineService _cruiseLineService;
         private readonly IDestinationService _destinationService;
-        private readonly ICruisePricingInventoryService _cruisePricingInventoryService;
-        private readonly ISailDateService _sailDateService;
-        private readonly ICruisePricingCabinService _cruisePricingCabinService;
+        private readonly ICruiseCabinPricingService _cruisePricingCabinService;
         private readonly AppDbContext _context;
 
         public CruiseInventoriesController(
             IDeparturePortService departurePortService,
-            ISailDateService sailDateService,
             ICruiseShipService cruiseShipService,
-            IcruiseInventoryService cruiseInventoryService,
+            ICruiseInventoryService cruiseInventoryService,
             ICruiseLineService cruiseLineService,
             IDestinationService destinationService,
-            ICruisePricingInventoryService cruisePricingInventoryService,
-            ICruisePricingCabinService cruisePricingCabinService,
+            ICruiseCabinPricingService cruisePricingCabinService,
             IMapper mapper,
             AppDbContext context)
         {
@@ -43,148 +41,71 @@ namespace Marketplace.API.Controllers.Inventory
             _cruiseShipService = cruiseShipService;
             _cruiseInventoryService = cruiseInventoryService;
             _cruiseLineService = cruiseLineService;
-            _destinationService = destinationService;
-            _cruisePricingInventoryService = cruisePricingInventoryService;
-            _sailDateService = sailDateService;
             _cruisePricingCabinService = cruisePricingCabinService;
+            _destinationService = destinationService;
             _mapper = mapper;
             _context = context;
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> SaveCruiseInventory([FromBody] CruiseInventoryRequest model)
+        public async Task<APIResponse<IActionResult>> SaveCruiseInventory([FromBody] CruiseInventoryRequest model)
         {
-            if (model == null)
-                return BadRequest(new { Success = false, Message = "Inventory data is missing." });
 
             try
             {
-                // Map request model to DTO
-                var cruiseInventory = new CruiseInventoryDto
-                {
-                    SailDate = model.SailDate,
-                    GroupId = model.GroupId,
-                    Nights = model.Nights,
-                    PackageDescription = model.PackageName,
-                  //  CategoryId = model.CategoryId, // if applicable
-                    DestinationId = model.DestinationId,
-                    DeparturePortId = model.DeparturePortId,
-                    ShipId = model.ShipId,
-                    CruiseLineId = model.CruiseLineId,
-                    CreatedOn = DateTime.UtcNow,
-                    CreatedBy = 1 // TODO: replace with logged-in user
-                };
-
                 // Insert cruise inventory
-                var insertedInventory = await _cruiseInventoryService.Insert(cruiseInventory);
+                var insertedInventory = await _cruiseInventoryService.Insert(model);
+                if (insertedInventory == null) throw new Exception("Something went wrong please try again later.");
 
                 // Save cabins if any
-                if (model.Cabins != null && model.Cabins.Any())
-                {
-                    var cabins = model.Cabins.Select(c => new CruisePricingCabinDto
-                    {
-                        CruisePricingInventoryId = insertedInventory.CruiseInventoryId, // corrected FK
-                        Type = c.Type,
-                        CabinNo = c.CabinNo,
-                        Status = c.Status
-                    }).ToList();
+                //    if (model.Cabins != null && model.Cabins.Any())
+                //    {
+                //        var cabins = model.Cabins.Select(c => new CruisePricingCabinDto
+                //        {
+                //            CruisePricingInventoryId = insertedInventory.CruiseInventoryId, // corrected FK
+                //            Type = c.Type,
+                //            CabinNo = c.CabinNo,
+                //            Status = c.Status
+                //        }).ToList();
 
-                   // await _cruisePricingInventoryService.Insert(cabins);
-                }
+                //       // await _cruisePricingInventoryService.Insert(cabins);
+                //    }
 
-                return Ok(new { Success = true, Message = "Cruise inventory saved successfully." });
+                //    return Ok(new { Success = true, Message = "Cruise inventory saved successfully." });
+                //}
+                //catch (Exception ex)
+                //{
+                //    return StatusCode(500, new
+                //    {
+                //        Success = false,
+                //        Message = "Error saving cruise inventory.",
+                //        Details = ex.Message
+                //    });
             }
-            catch (Exception ex)
+            catch
             {
-                return StatusCode(500, new
-                {
-                    Success = false,
-                    Message = "Error saving cruise inventory.",
-                    Details = ex.Message
-                });
+
             }
+            return null;
         }
 
 
-        /// <summary>
-        /// Get paginated list of cruise inventories
-        /// </summary>
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CruiseInventoryDto>>> GetList(
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] string? search = null,
-            [FromQuery] int? cruiseLineId = null)
-        {
-            if (pageNumber <= 0) pageNumber = 1;
-            if (pageSize <= 0) pageSize = 10;
-
-            var query = _context.CruiseInventories.AsQueryable();
-
-            // Optional filtering
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(x => x.CruiseShip.ShipName.Contains(search)
-                                      || x.CruiseShip.ShipCode.Contains(search));
-            }
-
-            if (cruiseLineId != 0 && cruiseLineId != null)
-            {
-                query = query.Where(x => x.CruiseShip.CruiseLineId == cruiseLineId);
-            }
-
-            // Count total records
-            var totalRecords = await query.CountAsync();
-
-            // Paging
-            var inventories = await query
-                .OrderByDescending(x => x.CreatedOn)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var response = _mapper.Map<IEnumerable<CruiseInventoryDto>>(inventories);
-
-            return Ok(new
-            {
-                TotalRecords = totalRecords,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                Data = response
-            });
-        }
-
-        // Existing GET endpoints (names purposely match frontend)
+    /*    // Existing GET endpoints (names purposely match frontend)
         [HttpGet("departures-by-destination/{destinationCode}")]
         public async Task<ActionResult<IEnumerable<object>>> GetDeparturePortsByDestination(string destinationCode)
         {
             var departurePorts = await _departurePortService.GetByDestinationCodeAsync(destinationCode);
-            return Ok(departurePorts.Select(p => new { p.DeparturePortId, p.DeparturePortName }));
+            return Ok(departurePorts.Select(p => new { p.Id, p.DeparturePortName }));
         }
 
         [HttpGet("ships-by-cruiseline/{cruiseLineId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetShipsByCruiseLine(int cruiseLineId)
         {
             var ships = await _cruiseShipService.GetByCruiseLineIdAsync(cruiseLineId);
-            return Ok(ships.Select(s => new { s.CruiseShipId, s.ShipName }));
-        }
+            return Ok(ships.Select(s => new { s.Id, s.ShipName }));
+        }*/
 
-        [HttpGet("saildates-by-ship/{cruiseShipId}")]
-        public async Task<ActionResult<IEnumerable<SelectListItem>>> GetSailDatesByCruiseShipId(int cruiseShipId)
-        {
-            var sailDates = await _sailDateService.GetAll();
-            var result = sailDates
-                .Where(s => s.CruiseShipID == cruiseShipId)
-                .Select(s => new SelectListItem
-                {
-                    Value = s.SaleDateId.ToString(),
-                    Text = s.SailDateTime.ToString("yyyy-MM-dd HH:mm:ss")
-                })
-                .ToList();
-
-            return Ok(result);
-        }
 
         [HttpGet("cabin-categories")]
         public ActionResult<IEnumerable<object>> GetCabinCategories()
@@ -222,89 +143,25 @@ namespace Marketplace.API.Controllers.Inventory
         [HttpGet("cruiselines")]
         public async Task<IActionResult> GetCruiseLines()
         {
-            var cruiseLines = await _cruiseLineService.GetAll();
-            return Ok(cruiseLines.Select(cl => new
+            var cruiseLines = await _cruiseLineService.GetList();
+            return Ok(cruiseLines.Items.Select(cl => new
             {
-                cl.CruiseLineId,
-                cl.CruiseLineName,
-                cl.CruiseLineCode
+                cl.Id,
+                cl.Name,
+                cl.Code
             }));
         }
 
         [HttpGet("destinations")]
         public async Task<IActionResult> GetDestinations()
         {
-            var destinations = await _destinationService.GetAll();
-            return Ok(destinations.Select(d => new
+            var destinations = await _destinationService.GetList();
+            return Ok(destinations.Items.Select(d => new
             {
-                d.DestinationCode,
-                d.DestinationName
+                d.Id,
+                d.Code,
+                d.Name
             }));
-        }
-
-
-        // ✅ GTY + Explicit cabin generation logic
-        //private async Task<List<CruisePricingCabinDto>> GenerateCabins(CruiseInventoryFormViewModel model)
-        //{
-        //    var existingCabins = await _cruisePricingCabinService.GetAll(
-        //        model.CruiseInventoryDto.SailDate,
-        //        model.CruiseInventoryDto.CruiseShip?.CruiseShipId ?? 0,
-        //        model.CruiseInventoryDto.GroupId
-        //    );
-
-        //    List<CruisePricingCabinDto> cabins = new List<CruisePricingCabinDto>();
-        //    int cabinIndex = 1;
-
-        //    if (model.Cabins != null)
-        //    {
-        //        foreach (var cabin in model.Cabins)
-        //        {
-        //            int gtyCount;
-
-        //            if (cabin.Type == "Gty" && int.TryParse(cabin.CabinNo, out gtyCount))
-        //            {
-        //                for (int i = 1; i <= gtyCount; i++)
-        //                {
-        //                    bool isRecordExist = true;
-
-        //                    while (isRecordExist)
-        //                    {
-        //                        var generatedNo = "GTY" + cabinIndex.ToString();
-        //                        isRecordExist = existingCabins.Any(x => x.CabinNo == generatedNo);
-
-        //                        if (!isRecordExist)
-        //                        {
-        //                            cabins.Add(new CruisePricingCabinDto
-        //                            {
-        //                                CabinNo = generatedNo,
-        //                                Status = cabin.Status,
-        //                                Type = "Gty"
-        //                            });
-        //                        }
-
-        //                        cabinIndex++;
-        //                    }
-        //                }
-        //            }
-        //            else
-        //            {
-        //                cabins.Add(new CruisePricingCabinDto
-        //                {
-        //                    CabinNo = cabin.CabinNo,
-        //                    Status = cabin.Status,
-        //                    Type = cabin.Type
-        //                });
-        //            }
-        //        }
-        //    }
-
-        //    return cabins;
-        //}
-
-
-
-        // NEW METHODS TO ADD
-
-        
+        }        
     }
 }

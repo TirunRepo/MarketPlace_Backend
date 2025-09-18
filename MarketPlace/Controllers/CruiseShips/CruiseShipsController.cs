@@ -1,7 +1,10 @@
 ﻿using MarketPlace.Business.Interfaces.Inventory;
+using MarketPlace.Common.APIResponse;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
 using MarketPlace.Common.PagedData;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Marketplace.API.Controllers.CruiseShips
@@ -23,96 +26,138 @@ namespace Marketplace.API.Controllers.CruiseShips
 
         // GET: api/CruiseShips?page=1&pageSize=10
         [HttpGet]
-        public async Task<ActionResult<PagedData<CruiseShipDto>>> GetShips(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetShips(int page = 1, int pageSize = 10)
         {
             if (page <= 0 || pageSize <= 0)
-                return BadRequest("Page and pageSize must be greater than zero.");
-
-            var allShips = await _cruiseShipService.GetAll() ?? new List<CruiseShipDto>();
-
-            var totalCount = allShips.Count();
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-
-            var pagedShips = allShips
-                .OrderBy(s => s.ShipName) // stable ordering for pagination
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            var result = new PagedData<CruiseShipDto>
             {
-                Items = pagedShips,
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-                TotalPages = totalPages
-            };
+                return BadRequest(new APIResponse<PagedData<CruiseShipReponse>>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Page and pageSize must be greater than zero."
+                });
+            }
 
-            return Ok(result);
+            var pagedShips = await _cruiseShipService.GetList(page, pageSize);
+
+            return Ok(new APIResponse<PagedData<CruiseShipReponse>>
+            {
+                Success = true,
+                Data = pagedShips,
+                Message = "Cruise ships retrieved successfully."
+            });
         }
 
         // POST: api/CruiseShips
         [HttpPost]
-        public async Task<IActionResult> AddShip([FromBody] CruiseShipDto model)
+        public async Task<IActionResult> AddShip([FromBody] CruiseShipRequest model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new APIResponse<CruiseLineRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Invalid model data."
+                });
 
-            // Verify cruise line exists
-            var cruiseLines = await _cruiseLineService.GetAll();
-            var selectedCruiseLine = cruiseLines.FirstOrDefault(cl => cl.CruiseLineId == model.CruiseLineId);
-
-            if (selectedCruiseLine == null)
-                return BadRequest(new { Message = "Invalid Cruise Line selected." });
-
-            // Ensure DTO is mapped correctly
-            var cruiseShipDto = new CruiseShipDto
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            model.RecordBase = new()
             {
-                ShipName = model.ShipName,
-                ShipCode = model.ShipCode,
-                CruiseLineId = selectedCruiseLine.CruiseLineId ?? 0
+                Id = Convert.ToInt32(userId),
+                CreatedBy = User.Identity.Name.ToString(),
+                CreatedOn = DateTime.Now,
             };
+            var result = await _cruiseShipService.Insert(model);
 
-            var result = await _cruiseShipService.Insert(cruiseShipDto);
-
-            if (result != null && result.CruiseShipId.HasValue)
-                return CreatedAtAction(nameof(GetShips), new { page = 1, pageSize = 10 }, result);
-
-            return StatusCode(500, new { Message = "Failed to add cruise ship." });
-        }
-
-        // DELETE: api/Ships/5
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteShip(int id)
-        {
-            var ship = await _cruiseShipService.GetById(id);
-            if (ship == null)
+            if (result != null)
             {
-                return NotFound(new { status = 404, message = "Ship not found." });
+                var response = new APIResponse<CruiseShipRequest>
+                {
+                    Success = true,
+                    Data = result,
+                    Message = "Cruise line added successfully."
+                };
+
+                return Ok(response); // ✅ simple success response
             }
 
-            await _cruiseShipService.Delete(id);
-            return Ok(new { status = 200, message = "Ship deleted successfully." });
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new APIResponse<CruiseLineRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Failed to add cruise line."
+                });
         }
+
         [HttpPost("update")]
-        public async Task<IActionResult> UpdateShips([FromBody] CruiseShipDto cruiseShipDto)
+        public async Task<IActionResult> UpdateShips(int Id,[FromBody] CruiseShipRequest model)
         {
-            if (cruiseShipDto == null)
-                return BadRequest("User data is required");
+            if (model == null)
+            {
+                return BadRequest(new APIResponse<CruiseShipRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Cruise line data is required."
+                });
+            }
 
-            var updatedUser = await _cruiseShipService.Update(cruiseShipDto);
-            return Ok(updatedUser);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new APIResponse<CruiseShipRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "User not authorized."
+                });
+            }
+
+            // ✅ set updated info
+            model.RecordBase ??= new(); // ensure not null
+            model.RecordBase.UpdatedBy = User.Identity?.Name;
+            model.RecordBase.UpdatedOn = DateTime.Now;
+            model.RecordBase.Id = Convert.ToInt32(userId);
+
+            var updated = await _cruiseShipService.Update(Id, model);
+
+            if (updated == null)
+            {
+                return NotFound(new APIResponse<CruiseShipRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = $"Cruise line with ID {Id} not found."
+                });
+            }
+
+            return Ok(new APIResponse<CruiseShipRequest>
+            {
+                Success = true,
+                Data = updated,
+                Message = "Cruise line updated successfully."
+            });
         }
-        // GET: api/CruiseLines
-        [HttpGet("CruiseLine")]
-        public async Task<ActionResult<List<CruiseLineDto>>> GetAllCruiseLines()
+        // DELETE: api/Ships/5
+        [HttpDelete("{id:int}")]
+        public async Task<bool> DeleteShip(int id)
         {
-            var cruiseLines = await _cruiseLineService.GetAll();
+            try
+            {
+                var line = await _cruiseShipService.GetById(id);
+                if (line == null)
+                {
+                    return false; // not found
+                }
 
-            // Optional: sort by name
-            var sortedLines = cruiseLines.OrderBy(c => c.CruiseLineName).ToList();
-
-            return Ok(sortedLines);
+                return await _cruiseShipService.Delete(id); ; // deleted successfully
+            }
+            catch
+            {
+                return false; // error occurred
+            }
+           
         }
     }
 }

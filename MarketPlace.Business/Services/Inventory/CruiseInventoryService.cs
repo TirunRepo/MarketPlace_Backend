@@ -1,15 +1,11 @@
 ﻿using MarketPlace.Business.Interfaces.Inventory;
+using MarketPlace.Common.APIResponse;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MarketPlace.Business.Services.Inventory
 {
-    public class CruiseInventoryService : IcruiseInventoryService
+    public class CruiseInventoryService : ICruiseInventoryService
     {
         private readonly ICruiseInventoryRepository _cruiseInventoryRepository;
 
@@ -18,29 +14,37 @@ namespace MarketPlace.Business.Services.Inventory
             _cruiseInventoryRepository = cruiseInventoryRepository ?? throw new ArgumentNullException(nameof(cruiseInventoryRepository));
         }
 
-        public async Task<IEnumerable<CruiseInventoryDto>> GetAll()
-        {
-            return await _cruiseInventoryRepository.GetAll();
-        }
 
-        public async Task<CruiseInventoryDto> GetById(int id)
+        public async Task<CruiseInventoryModel> Insert(CruiseInventoryRequest model) 
         {
-            return await _cruiseInventoryRepository.GetById(id);
-        }
+            try
+            {
 
-        public async Task<CruiseInventoryDto> Insert(CruiseInventoryDto inventoryDto)
-        {
-            return await _cruiseInventoryRepository.Insert(inventoryDto);
-        }
+                CruiseInventoryModel inventoryModel = new()
+                {
+                    SailDate = model.SailDate,
+                    CabinOccupancy = model.CabinOccupancy,
+                    CategoryId = model.CategoryId,
+                    GroupId = model.GroupId,
+                    Nights = model.Nights,
+                    PackageName = model.PackageName,
+                    ShipCode = model.ShipCode,
+                    Stateroom = model.Stateroom,
+                    CruiseLineId = model.CruiseLineId,
+                    CruiseShipId = model.ShipId,
+                    DeparturePortId = model.DeparturePortId,
+                    DestinationId = model.DestinationId,
+                    EnableAdmin = model.EnableAdmin,
+                    EnableAgent = model.EnableAgent,
+                    RecordBase = model.RecordBase,
+                };
 
-        public async Task<CruiseInventoryDto> Update(CruiseInventoryDto inventoryDto)
-        {
-            return await _cruiseInventoryRepository.Update(inventoryDto);
-        }
-
-        public async Task<bool> Delete(int id)
-        {
-            return await _cruiseInventoryRepository.Delete(id);
+                return await _cruiseInventoryRepository.Insert(inventoryModel);
+            }
+            catch (Exception ex) 
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

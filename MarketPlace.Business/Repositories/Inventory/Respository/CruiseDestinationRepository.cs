@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
+using MarketPlace.Common.PagedData;
 using MarketPlace.DataAccess.DBContext;
 using MarketPlace.DataAccess.Entities.Inventory;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
@@ -23,68 +25,59 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<DestinationDto> Insert(DestinationDto destinationDto)
+        public async Task<DestinationRequest> Insert(DestinationRequest model)
         {
-            var destination = _mapper.Map<Destination>(destinationDto);
+            var entity = _mapper.Map<Destination>(model);
 
 
-            destination.CreatedOn = DateTime.UtcNow;
-            destination.CreatedBy = 1; // 🔹 Replace with actual user id
-            destination.ModifiedBy = 1;
-            destination.LastModifiedOn = DateTime.UtcNow;
-
-            _context.Destinations.Add(destination);
+            _context.Destinations.Add(entity);
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<DestinationDto>(destination);
+            return _mapper.Map<DestinationRequest>(entity);
         }
 
-        public async Task<DestinationDto> Update(DestinationDto destinationDto)
+        public async Task<DestinationRequest> Update(int Id, DestinationRequest model)
         {
-            var destination = await _context.Destinations.FindAsync(destinationDto.DestinationCode);
-            if (destination == null)
-                throw new KeyNotFoundException("Destination not found");
+            var existing = await _context.Destinations
+                .Include(dp => dp.Id)
+                .FirstOrDefaultAsync(dp => dp.Id == Id);
 
-            _mapper.Map(destinationDto, destination);
+            if (existing == null)
+                throw new KeyNotFoundException("Departure Port not found");
 
-            destination.ModifiedBy = 1; // 🔹 Replace with actual user id
-            destination.LastModifiedOn = DateTime.UtcNow;
+            _mapper.Map(model, existing);
 
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<DestinationDto>(destination);
+            return _mapper.Map<DestinationRequest>(existing);
         }
 
-        public async Task<bool> Delete(string destinationCode)
+
+        public async Task<bool> Delete(int id)
         {
-            try
-            {
-                var destination = await _context.Destinations.FindAsync(destinationCode);
-                if (destination == null) return false;
+            var departurePort = await _context.Destinations.FindAsync(id);
+            if (departurePort == null) return false;
 
-                _context.Destinations.Remove(destination);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
+            _context.Destinations.Remove(departurePort);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task<IEnumerable<DestinationDto>> GetAll()
+        public async Task<PagedData<DestinationResponse>> GetList()
         {
-            var destinations = await _context.Destinations.ToListAsync();
-            return _mapper.Map<IEnumerable<DestinationDto>>(destinations);
+
+            var departurePort = await _context.Destinations.ToListAsync();
+
+            return _mapper.Map<PagedData<DestinationResponse>>(departurePort);
         }
 
-        public async Task<DestinationDto> GetByCode(string destinationCode)
+        public async Task<DestinationResponse> GetById(int id)
         {
-            var destination = await _context.Destinations
-                .FirstOrDefaultAsync(d => d.DestinationCode == destinationCode);
+            var port = await _context.Destinations
+                .Include(dp => dp.Id)
+                .FirstOrDefaultAsync(dp => dp.Id == id);
 
-            return destination == null ? null : _mapper.Map<DestinationDto>(destination);
+            return port == null ? null : _mapper.Map<DestinationResponse>(port);
         }
     }
 }

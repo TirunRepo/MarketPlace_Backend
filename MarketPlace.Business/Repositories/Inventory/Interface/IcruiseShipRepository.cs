@@ -1,4 +1,6 @@
 ﻿using MarketPlace.Common.DTOs.RequestModels.Inventory;
+using MarketPlace.Common.DTOs.ResponseModels.Inventory;
+using MarketPlace.Common.PagedData;
 using MarketPlace.DataAccess.Entities.Inventory;
 using System;
 using System.Collections.Generic;
@@ -8,13 +10,12 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Repositories.Inventory.Interface
 {
-    public interface IcruiseShipRepository
+    public interface ICruiseShipRepository
     {
-        Task<CruiseShipDto> Insert(CruiseShipDto cruiseShipDto);
-        Task<CruiseShipDto> Update(CruiseShipDto cruiseShipDto);
+        Task<CruiseShipRequest> Insert(CruiseShipRequest cruiseShipDto);
+        Task<CruiseShipRequest> Update(int Id, CruiseShipRequest cruiseShipDto);
         Task<bool> Delete(int id);
-        Task<IEnumerable<CruiseShipDto>> GetAll();
-        Task<CruiseShipDto> GetById(int id);
-        Task<IEnumerable<CruiseShip>> GetByCruiseLineIdAsync(int cruiseLineId);
+        Task<PagedData<CruiseShipReponse>> GetList(int page, int pageSize);
+        Task<CruiseShipReponse> GetById(int id);
     }
 }

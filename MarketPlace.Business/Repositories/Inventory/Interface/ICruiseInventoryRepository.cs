@@ -9,10 +9,7 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Interface
 {
     public interface ICruiseInventoryRepository
     {
-        Task<IEnumerable<CruiseInventoryDto>> GetAll();
-        Task<CruiseInventoryDto> GetById(int id);
-        Task<CruiseInventoryDto> Insert(CruiseInventoryDto cruiseInventoryDto);
-        Task<CruiseInventoryDto> Update(CruiseInventoryDto cruiseInventoryDto);
-        Task<bool> Delete(int id);
+        Task<CruiseInventoryModel> Insert(CruiseInventoryModel cruiseInventoryDto);
+
     }
 }
