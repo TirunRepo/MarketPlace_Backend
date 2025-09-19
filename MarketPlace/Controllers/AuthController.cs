@@ -1,10 +1,10 @@
-﻿    using MarketPlace.Business.Interfaces;
-    using MarketPlace.Common.DTOs;
-    using MarketPlace.DataAccess.Entities;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
+﻿using MarketPlace.Business.Services.Interface;
+using MarketPlace.Common.DTOs;
+using MarketPlace.DataAccess.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-    [ApiController]
+[ApiController]
     [Route("auth")]
     public class AuthController : ControllerBase
     {

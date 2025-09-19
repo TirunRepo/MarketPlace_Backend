@@ -37,9 +37,7 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
         {
             try
             {
-                var cruiseShip = await _context.CruiseShips
-                        .Include(cs => cs.Id)
-                        .FirstOrDefaultAsync(cs => cs.Id == Id);
+                var cruiseShip = await _context.CruiseShips.FindAsync(Id);
 
                 if (cruiseShip == null)
                     throw new KeyNotFoundException("Cruise ship not found");

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MarketPlace.Business.Interfaces.Inventory
+namespace MarketPlace.Business.Services.Interface.Inventory
 {
     public interface ICruiseInventoryService
     {

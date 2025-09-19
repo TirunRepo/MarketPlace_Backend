@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MarketPlace.Common.CommonModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace MarketPlace.Common.DTOs.ResponseModels.Inventory
         public string Code { get; set; }
     }
 
-    public class CruiseLineModal
+    public class CruiseLineModal: RecordBase
     {
         public string Name { get; set; }
         public string Code { get; set; }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Entities.Inventory
 {
-    public class CruiseLine
+    public class CruiseLine :RecordBase
     {
         [Key]
         public int Id { get; set; }  // 🔹 New Primary Key
@@ -19,6 +19,5 @@ namespace MarketPlace.DataAccess.Entities.Inventory
         [StringLength(50)]
         public required string Code { get; set; } 
 
-        public RecordBase? RecordBase { get; set; }
     }
 }

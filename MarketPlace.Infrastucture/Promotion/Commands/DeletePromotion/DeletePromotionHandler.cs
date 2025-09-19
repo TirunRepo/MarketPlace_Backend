@@ -1,4 +1,4 @@
-﻿using MarketPlace.Business.Interfaces.Promotions;
+﻿using MarketPlace.Business.Services.Interface.Promotions;
 using MediatR;
 
 namespace MarketPlace.Infrastucture.Promotion.Commands.DeletePromotion

@@ -26,7 +26,7 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
 
         public async Task<bool> InsertCabinsAsync(CruiseCabinPricingModel cabinDtos)
         {
-           var cabins = _mapper.Map<CruiseCabinPricingInventory>(cabinDtos);
+           var cabins = _mapper.Map<CruisePricingInventory>(cabinDtos);
            await _context.CruiseCabinPricingInventories.AddAsync(cabins);
 
            if(await _context.SaveChangesAsync() != 0)

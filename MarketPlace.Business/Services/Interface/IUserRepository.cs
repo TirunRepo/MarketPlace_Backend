@@ -1,5 +1,5 @@
 ﻿using MarketPlace.DataAccess.Entities;
-namespace MarketPlace.Business.Interfaces
+namespace MarketPlace.Business.Services.Interface
 {
     public interface IUserRepository
     {

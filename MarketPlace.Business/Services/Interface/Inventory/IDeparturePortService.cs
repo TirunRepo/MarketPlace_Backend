@@ -8,11 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MarketPlace.Business.Interfaces.Inventory
+namespace MarketPlace.Business.Services.Interface.Inventory
 {
     public interface IDeparturePortService
     {
-        Task<PagedData<CruiseDeparturePortResponse>> GetList();
+        Task<PagedData<CruiseDeparturePortResponse>> GetList(int page, int pageSize);
         Task<CruiseDeparturePortResponse> GetById(int id);
         Task<DeparturePortRequest> Insert(DeparturePortRequest portDto);
         Task<DeparturePortRequest> Update(int Id, DeparturePortRequest portDto);

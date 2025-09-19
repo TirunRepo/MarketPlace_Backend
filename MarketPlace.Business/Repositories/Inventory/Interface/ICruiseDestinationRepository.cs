@@ -1,4 +1,5 @@
-﻿using MarketPlace.Common.DTOs.RequestModels.Inventory;
+﻿using MarketPlace.Common.CommonModel;
+using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.DTOs.ResponseModels.Inventory;
 using MarketPlace.Common.PagedData;
 using MarketPlace.DataAccess.Entities.Inventory;
@@ -15,8 +16,10 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Interface
         Task<DestinationRequest> Insert(DestinationRequest model);
         Task<DestinationRequest> Update(int Id, DestinationRequest model);
         Task<bool> Delete(int id);
-        Task<PagedData<DestinationResponse>> GetList();
+        Task<PagedData<DestinationResponse>> GetList(int page, int pageSize);
         Task<DestinationResponse> GetById(int id);
+        Task<List<IdNameModel<int>>> Get();
+
 
     }
 }

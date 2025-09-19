@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MarketPlace.Business.Interfaces.Inventory
+namespace MarketPlace.Business.Services.Interface.Inventory
 {
-    public interface ICruiseCabinPricingService
+    public interface ICruiseCabinInventory
     {
-        Task<bool> InsertCabinsAsync(CruiseInventoryRequest model);
+        Task<CruiseCabinInventoryRequest> Insert(CruiseCabinInventoryRequest model);
+
     }
 }

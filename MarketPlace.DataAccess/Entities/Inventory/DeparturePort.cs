@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Entities.Inventory
 {
-    public class DeparturePort
+    public class DeparturePort :RecordBase
     {
         [Key]
         public int Id { get; set; }  // 🔹 New Primary Key
@@ -25,6 +25,5 @@ namespace MarketPlace.DataAccess.Entities.Inventory
         [Required]
         [ForeignKey("DestinationId")]
         public required string DestinationId { get; set; }  //  The actual FK property
-        public RecordBase? RecordBase { get; set; }
     }
 }

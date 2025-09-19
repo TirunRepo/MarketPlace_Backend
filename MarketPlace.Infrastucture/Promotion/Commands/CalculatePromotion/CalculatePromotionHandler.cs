@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using MarketPlace.Business.Interfaces.Promotions;
+using MarketPlace.Business.Services.Interface.Promotions;
 using MarketPlace.Common.APIResponse;
 using MarketPlace.Common.DTOs.ResponseModels.Promotions;
 using MediatR;

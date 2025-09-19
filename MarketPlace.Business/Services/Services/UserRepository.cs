@@ -1,9 +1,9 @@
-﻿using MarketPlace.Business.Interfaces;
+﻿using MarketPlace.Business.Services.Interface;
 using MarketPlace.DataAccess.DBContext;
 using MarketPlace.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace MarketPlace.Business.Services
+namespace MarketPlace.Business.Services.Services
 {
     public class UserRepository : IUserRepository
     {

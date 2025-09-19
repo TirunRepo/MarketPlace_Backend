@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Entities.Inventory
 {
-    public class CruiseShip
+    public class CruiseShip : RecordBase
     {
         [Key]
         public int Id { get; set; }
@@ -24,6 +24,5 @@ namespace MarketPlace.DataAccess.Entities.Inventory
         [ForeignKey("CruiseLineId")]
         public int CruiseLineId { get; set; } 
 
-        public RecordBase? Record { get; set; }
     }
 }

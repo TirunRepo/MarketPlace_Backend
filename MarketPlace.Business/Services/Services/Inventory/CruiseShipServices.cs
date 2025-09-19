@@ -1,4 +1,4 @@
-﻿using MarketPlace.Business.Interfaces.Inventory;
+﻿using MarketPlace.Business.Services.Interface.Inventory;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.DTOs.ResponseModels.Inventory;
 using MarketPlace.Common.PagedData;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MarketPlace.Business.Services.Inventory
+namespace MarketPlace.Business.Services.Services.Inventory
 {
 
     public class CruiseShipServices : ICruiseShipService

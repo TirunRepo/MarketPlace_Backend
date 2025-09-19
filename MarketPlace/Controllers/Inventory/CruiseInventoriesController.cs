@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
-using MarketPlace.Business.Interfaces.Inventory;
-using MarketPlace.Business.Services.Inventory;
+using MarketPlace.Business.Services.Interface.Inventory;
 using MarketPlace.Common.APIResponse;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.Types.Inventory;
@@ -15,7 +14,7 @@ using System.Threading.Tasks;
 namespace Marketplace.API.Controllers.Inventory
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class CruiseInventoriesController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -91,77 +90,6 @@ namespace Marketplace.API.Controllers.Inventory
         }
 
 
-    /*    // Existing GET endpoints (names purposely match frontend)
-        [HttpGet("departures-by-destination/{destinationCode}")]
-        public async Task<ActionResult<IEnumerable<object>>> GetDeparturePortsByDestination(string destinationCode)
-        {
-            var departurePorts = await _departurePortService.GetByDestinationCodeAsync(destinationCode);
-            return Ok(departurePorts.Select(p => new { p.Id, p.DeparturePortName }));
-        }
 
-        [HttpGet("ships-by-cruiseline/{cruiseLineId}")]
-        public async Task<ActionResult<IEnumerable<object>>> GetShipsByCruiseLine(int cruiseLineId)
-        {
-            var ships = await _cruiseShipService.GetByCruiseLineIdAsync(cruiseLineId);
-            return Ok(ships.Select(s => new { s.Id, s.ShipName }));
-        }*/
-
-
-        [HttpGet("cabin-categories")]
-        public ActionResult<IEnumerable<object>> GetCabinCategories()
-        {
-            var categories = Enum.GetValues(typeof(CabinCategoryEnum))
-                .Cast<CabinCategoryEnum>()
-                .Select(e => new { Value = (int)e, Text = e.ToString() })
-                .ToList();
-
-            return Ok(categories);
-        }
-
-        [HttpGet("cabin-number-types")]
-        public ActionResult<IEnumerable<object>> GetCabinNumberTypes()
-        {
-            var types = Enum.GetValues(typeof(CabinNoTypeEnum))
-                .Cast<CabinNoTypeEnum>()
-                .Select(e => new { Value = (int)e, Text = e.ToString() })
-                .ToList();
-
-            return Ok(types);
-        }
-
-        [HttpGet("cabin-occupancies")]
-        public ActionResult<IEnumerable<object>> GetCabinOccupancies()
-        {
-            var occupancies = Enum.GetValues(typeof(CabinOccupancyEnum))
-                .Cast<CabinOccupancyEnum>()
-                .Select(e => new { Value = (int)e, Text = e.ToString() })
-                .ToList();
-
-            return Ok(occupancies);
-        }
-
-        [HttpGet("cruiselines")]
-        public async Task<IActionResult> GetCruiseLines()
-        {
-            var cruiseLines = await _cruiseLineService.GetList();
-            return Ok(cruiseLines.Items.Select(cl => new
-            {
-                cl.Id,
-                cl.Name,
-                cl.Code
-            }));
-        }
-
-        [HttpGet("destinations")]
-        public async Task<IActionResult> GetDestinations()
-        {
-            var destinations = await _destinationService.GetList();
-            return Ok(destinations.Items.Select(d => new
-            {
-                d.Id,
-                d.Code,
-                d.Name
-            }));
-        }        
     }
 }

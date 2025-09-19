@@ -35,9 +35,11 @@ namespace MarketPlace.Common.Mapping
             // ========================
             CreateMap<CruiseLine, CruiseLineResponse>().ReverseMap();
             CreateMap<CruiseLine, CruiseLineRequest>().ReverseMap();
+            CreateMap<CruiseLine, CruiseLineModal>().ReverseMap();
+            CreateMap<CruiseCabinInventory, CruiseCabinInventoryRequest>().ReverseMap();
 
-            CreateMap<CruiseShip, CruiseLineRequest>().ReverseMap();
-            CreateMap<CruiseShip, CruiseLineResponse>().ReverseMap();
+            CreateMap<CruiseShip, CruiseShipReponse>().ReverseMap();
+            CreateMap<CruiseShip, CruiseShipRequest>().ReverseMap();
             //
             CreateMap<Destination, DestinationRequest>().ReverseMap();
             CreateMap<Destination, DestinationResponse>().ReverseMap();
@@ -49,8 +51,8 @@ namespace MarketPlace.Common.Mapping
             CreateMap<CruiseInventoryModel, CruiseInventory>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
 
-            CreateMap<CruiseCabinPricingModel, CruiseCabinPricingInventory>();
-            CreateMap<CruiseCabinPricingInventory, CruiseCabinPricingModel>();
+            CreateMap<CruiseCabinPricingModel, CruisePricingInventory>();
+            CreateMap<CruisePricingInventory, CruiseCabinPricingModel>();
         }
     }
 }

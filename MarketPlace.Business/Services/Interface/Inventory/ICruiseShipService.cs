@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MarketPlace.Business.Interfaces.Inventory
+namespace MarketPlace.Business.Services.Interface.Inventory
 {
     public interface ICruiseShipService
     {
@@ -17,6 +17,5 @@ namespace MarketPlace.Business.Interfaces.Inventory
         Task<CruiseShipRequest> Insert(CruiseShipRequest cruiseShipDto);
         Task<CruiseShipRequest> Update(int Id,CruiseShipRequest cruiseShipDto);
         Task<bool> Delete(int id);
-
     }
 }

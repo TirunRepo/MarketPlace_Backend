@@ -15,7 +15,8 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Interface
         Task<DeparturePortRequest> Insert(DeparturePortRequest model);
         Task<DeparturePortRequest> Update(int Id, DeparturePortRequest model);
         Task<bool> Delete(int id);
-        Task<PagedData<CruiseDeparturePortResponse>> GetList();
+        Task<PagedData<CruiseDeparturePortResponse>> GetList(int page, int pageSize);
+
         Task<CruiseDeparturePortResponse> GetById(int id);
     }
 }

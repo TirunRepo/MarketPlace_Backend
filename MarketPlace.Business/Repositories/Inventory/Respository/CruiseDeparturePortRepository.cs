@@ -33,9 +33,7 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
 
         public async Task<DeparturePortRequest> Update(int Id, DeparturePortRequest model)
         {
-            var existing = await _context.DeparturePorts
-                .Include(dp => dp.Id)
-                .FirstOrDefaultAsync(dp => dp.Id == Id);
+            var existing = await _context.DeparturePorts.FindAsync(Id);
 
             if (existing == null)
                 throw new KeyNotFoundException("Departure Port not found");
@@ -58,19 +56,29 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
             return true;
         }
 
-        public async Task<PagedData<CruiseDeparturePortResponse>> GetList()
+        public async Task<PagedData<CruiseDeparturePortResponse>> GetList(int page = 1, int pageSize = 10)
         {
+            var query = _context.DeparturePorts.AsQueryable();
 
-            var departurePort = await _context.DeparturePorts.ToListAsync();
+            var totalCount = await query.CountAsync();
 
-            return _mapper.Map<PagedData<CruiseDeparturePortResponse>>(departurePort);
+            var cruiseShips = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedShips = _mapper.Map<List<CruiseDeparturePortResponse>>(cruiseShips);
+
+            return new PagedData<CruiseDeparturePortResponse>
+            {
+                Items = mappedShips,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
         }
-
         public async Task<CruiseDeparturePortResponse> GetById(int id)
         {
-            var port = await _context.DeparturePorts
-                .Include(dp => dp.DestinationId)
-                .FirstOrDefaultAsync(dp => dp.Id == id);
+            var port = await _context.DeparturePorts.FindAsync(id);
 
             return port == null ? null : _mapper.Map<CruiseDeparturePortResponse>(port);
         }

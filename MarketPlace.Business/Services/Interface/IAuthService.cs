@@ -2,7 +2,7 @@
 using MarketPlace.Common.DTOs;
 using System.Security.Claims;
 
-namespace MarketPlace.Business.Interfaces
+namespace MarketPlace.Business.Services.Interface
 {
     public interface IAuthService
     {

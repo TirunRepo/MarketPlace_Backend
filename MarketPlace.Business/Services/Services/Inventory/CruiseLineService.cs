@@ -1,16 +1,18 @@
-﻿using MarketPlace.Business.Interfaces.Inventory;
+﻿using MarketPlace.Business.Services.Interface.Inventory;
+using MarketPlace.Common.CommonModel;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.DTOs.ResponseModels.Inventory;
 using MarketPlace.Common.PagedData;
 using MarketPlace.DataAccess.Entities.Inventory;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
+using MarketPlace.DataAccess.Repositories.Inventory.Respository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MarketPlace.Business.Services.Inventory
+namespace MarketPlace.Business.Services.Services.Inventory
 {
     public class CruiseLineService : ICruiseLineService
     {
@@ -39,11 +41,15 @@ namespace MarketPlace.Business.Services.Inventory
             return await _cruiselineRepository.GetById(Id);
         }
 
-        public async Task<PagedData<CruiseLineResponse>> GetList()
+        public async Task<PagedData<CruiseLineResponse>> GetList(int page, int pageSize)
         {
-            return await _cruiselineRepository.GetList();
+            return await _cruiselineRepository.GetList(page, pageSize);
         }
 
+        public async Task<List<IdNameModel<int>>> Get()
+        {
+            return await _cruiselineRepository.Get();
+        }
         public async Task<bool> Delete(int id)
         {
             return await _cruiselineRepository.Delete(id);

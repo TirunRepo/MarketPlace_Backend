@@ -7,15 +7,12 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.Common.DTOs.RequestModels.Inventory
 {
-    public class DeparturePortRequest
+    public class DeparturePortRequest :RecordBase
     {
         public int? Id { get; set; }
 
         public required string Code { get; set; }
 
         public required string Name { get; set; }
-        //public string? Destination { get; set; }
-        /// <summary>
-        public RecordBase? RecordBase { get; set; }
     }
 }

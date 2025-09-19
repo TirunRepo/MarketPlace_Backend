@@ -1,18 +1,16 @@
-﻿using MarketPlace.Business.Interfaces;
-using MarketPlace.Business.Interfaces.Inventory;
+﻿using MarketPlace.Business.Services.Interface;
+using MarketPlace.Business.Services.Interface.Inventory;
 using MarketPlace.Common.APIResponse;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.DTOs.ResponseModels.Inventory;
 using MarketPlace.Common.PagedData;
-using MarketPlace.DataAccess.Entities.Inventory;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Marketplace.API.Controllers.CruiseLines
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class CruiseLinesController : ControllerBase
     {
         private readonly ICruiseLineService _cruiseLineService;
@@ -33,30 +31,25 @@ namespace Marketplace.API.Controllers.CruiseLines
         [HttpGet]
         public async Task<ActionResult<PagedData<CruiseLineResponse>>> GetList(int page = 1, int pageSize = 10)
         {
+
             if (page <= 0 || pageSize <= 0)
-                return BadRequest("Page and pageSize must be greater than zero.");
-
-            var allCruiseLines = await _cruiseLineService.GetList();
-
-            var totalCount = allCruiseLines.TotalCount;
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-
-            var pagedCruiseLines = allCruiseLines.Items
-                .OrderBy(c => c.Id)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            var result = new PagedData<CruiseLineResponse>
             {
-                Items = pagedCruiseLines,
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-                TotalPages = totalPages
-            };
+                return BadRequest(new APIResponse<PagedData<CruiseLineResponse>>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Page and pageSize must be greater than zero."
+                });
+            }
 
-            return Ok(result);
+            var pagedShips = await _cruiseLineService.GetList(page, pageSize);
+
+            return Ok(new APIResponse<PagedData<CruiseLineResponse>>
+            {
+                Success = true,
+                Data = pagedShips,
+                Message = "Cruise ships retrieved successfully."
+            });
         }
 
         // POST: api/CruiseLines
@@ -72,12 +65,22 @@ namespace Marketplace.API.Controllers.CruiseLines
                 });
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            model.RecordBase = new()
+            var user = await _userRepository.GetByEmailAsync(userId!);
+            if(user == null) 
             {
-                Id = Convert.ToInt32(userId),
-                CreatedBy = User.Identity.Name.ToString(),
-                CreatedOn = DateTime.Now,
+                return BadRequest(new APIResponse<CruiseLineRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Invalid user"
+                });
+            }
+            model.CreatedBy = new()
+            {
+                Id = user.Id,
+                Name = user.FullName
             };
+            model.CreatedOn = DateTime.Now;
             var result = await _cruiseLineService.Insert(model);
 
             if (result != null)
@@ -101,7 +104,7 @@ namespace Marketplace.API.Controllers.CruiseLines
                 });
         }
 
-        [HttpPost("update")]
+        [HttpPost("update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] CruiseLineRequest model)
         {
             if (model == null)
@@ -124,12 +127,27 @@ namespace Marketplace.API.Controllers.CruiseLines
                     Message = "User not authorized."
                 });
             }
+            var line = await _cruiseLineService.GetById(id);
+            var user = await _userRepository.GetByEmailAsync(userId!);
+            if (user == null)
+            {
+                return BadRequest(new APIResponse<CruiseLineRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Invalid user"
+                });
+            }
 
-            // ✅ set updated info
-            model.RecordBase ??= new(); // ensure not null
-            model.RecordBase.UpdatedBy = User.Identity?.Name;
-            model.RecordBase.UpdatedOn = DateTime.Now;
-            model.RecordBase.Id = Convert.ToInt32(userId);
+            model.CreatedBy = line.CreatedBy;
+            model.CreatedOn = line.CreatedOn;
+               model.UpdatedBy = new()
+               {
+                   Id = user.Id,
+                   Name = user.FullName
+               };
+               model.UpdatedOn = DateTime.Now;
+
 
             var updated = await _cruiseLineService.Update(id, model);
 

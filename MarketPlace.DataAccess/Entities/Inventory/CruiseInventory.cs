@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Entities.Inventory
 {
-    public class CruiseInventory
+    public class CruiseInventory :RecordBase
     {
         [Key]
         public int Id { get; set; }
@@ -34,9 +34,6 @@ namespace MarketPlace.DataAccess.Entities.Inventory
         public required string Stateroom { get; set; }
 
         public required string CabinOccupancy { get; set; }
-
-        public RecordBase RecordBase { get; set; }
-
         public bool EnableAdmin { get; set; }
         public bool EnableAgent { get; set; }
 

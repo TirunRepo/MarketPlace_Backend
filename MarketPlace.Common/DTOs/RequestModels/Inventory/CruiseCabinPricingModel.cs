@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.Common.DTOs.RequestModels.Inventory
 {
-    public class CruiseCabinPricingModel
+    public class CruiseCabinPricingModel : RecordBase
     {
         public int? CruiseInventoryId { get; set; }
         public required string PricingType { get; set; }
@@ -38,8 +38,5 @@ namespace MarketPlace.Common.DTOs.RequestModels.Inventory
         [Column(TypeName = "decimal(10,2)")]
         public decimal Nccf { get; set; }
 
-        public List<CruiseCabinDetails>? Cabins { get; set; }
-
-        public RecordBase? RecordBase { get; set; }
     }
 }

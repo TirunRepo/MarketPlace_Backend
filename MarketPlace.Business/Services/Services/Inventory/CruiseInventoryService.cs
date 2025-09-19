@@ -1,9 +1,9 @@
-﻿using MarketPlace.Business.Interfaces.Inventory;
+﻿using MarketPlace.Business.Services.Interface.Inventory;
 using MarketPlace.Common.APIResponse;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
 
-namespace MarketPlace.Business.Services.Inventory
+namespace MarketPlace.Business.Services.Services.Inventory
 {
     public class CruiseInventoryService : ICruiseInventoryService
     {
@@ -36,7 +36,6 @@ namespace MarketPlace.Business.Services.Inventory
                     DestinationId = model.DestinationId,
                     EnableAdmin = model.EnableAdmin,
                     EnableAgent = model.EnableAgent,
-                    RecordBase = model.RecordBase,
                 };
 
                 return await _cruiseInventoryRepository.Insert(inventoryModel);

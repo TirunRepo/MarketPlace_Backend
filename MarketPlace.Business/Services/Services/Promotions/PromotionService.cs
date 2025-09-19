@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using MarketPlace.Business.Interfaces.Promotions;
+using MarketPlace.Business.Services.Interface.Promotions;
 using MarketPlace.Common.DTOs.RequestModels.Promotions;
 using MarketPlace.Common.DTOs.ResponseModels.Promotions;
 using MarketPlace.Common.Types.Promotion;
 using MarketPlace.DataAccess.Entities.Promotions;
 using MarketPlace.DataAccess.Repositories.Promotions.Interface;
 
-namespace MarketPlace.Business.Services.Promotions
+namespace MarketPlace.Business.Services.Services.Promotions
 {
     public class PromotionService : IPromotionService
     {
@@ -60,10 +60,10 @@ namespace MarketPlace.Business.Services.Promotions
         {
             var promotions = await _repository.GetActivePromotionsAsync(request.BookingDate);
 
-            var filteredPromotions = promotions.Where(x => ((request.SupplierId > 0 && (x.SupplierId == null || x.SupplierId.Value == request.SupplierId)) ||
-                                                ((!request.SupplierId.HasValue || request.SupplierId <= 0) && x.SupplierId == null))
-                                                && ((request.SailingId > 0 && (x.SailingId == null || x.SailingId.Value == request.SailingId)) ||
-                                                ((!request.SailingId.HasValue || request.SailingId <= 0) && x.SailingId == null))).ToList();
+            var filteredPromotions = promotions.Where(x => (request.SupplierId > 0 && (x.SupplierId == null || x.SupplierId.Value == request.SupplierId) ||
+                                                (!request.SupplierId.HasValue || request.SupplierId <= 0) && x.SupplierId == null)
+                                                && (request.SailingId > 0 && (x.SailingId == null || x.SailingId.Value == request.SailingId) ||
+                                                (!request.SailingId.HasValue || request.SailingId <= 0) && x.SailingId == null)).ToList();
 
             var flatDiscountTypePromotions = GetFilteredRecords(filteredPromotions, PromotionCalculationType.FlatDiscount);
 
@@ -106,8 +106,8 @@ namespace MarketPlace.Business.Services.Promotions
             }
 
             response = response.OrderBy(x => request.PromoCodes == null || !request.PromoCodes.Any(x => !string.IsNullOrEmpty(x)) ||
-                        ((request.PromoCodes?.Any(x => !string.IsNullOrEmpty(x)) ?? false) &&
-                        request.PromoCodes.Any(y => y.ToLowerInvariant() == x.PromoCode.ToLowerInvariant()))).ToList();
+                        (request.PromoCodes?.Any(x => !string.IsNullOrEmpty(x)) ?? false) &&
+                        request.PromoCodes.Any(y => y.ToLowerInvariant() == x.PromoCode.ToLowerInvariant())).ToList();
 
             if (filteredPromotions.Count(x => x.IsStackable == true) > 1)
             {
@@ -115,9 +115,9 @@ namespace MarketPlace.Business.Services.Promotions
                 response.Add(new PromotionCalculationResponse
                 {
                     Id = 0,
-                    PromotionName = String.Join(", ", stackablePromotions.Select(x => x.PromotionName).ToArray()),
-                    PromotionDescription = String.Join(", ", stackablePromotions.Select(x => x.PromotionDescription).ToArray()),
-                    PromoCode = String.Join(", ", stackablePromotions.Select(x => x.PromoCode).ToArray()),
+                    PromotionName = string.Join(", ", stackablePromotions.Select(x => x.PromotionName).ToArray()),
+                    PromotionDescription = string.Join(", ", stackablePromotions.Select(x => x.PromotionDescription).ToArray()),
+                    PromoCode = string.Join(", ", stackablePromotions.Select(x => x.PromoCode).ToArray()),
                     IncludesAirfare = stackablePromotions.Any(x => x.IncludesAirfare == true),
                     IncludesHotel = stackablePromotions.Any(x => x.IncludesHotel == true),
                     IncludesWiFi = stackablePromotions.Any(x => x.IncludesWiFi == true),
@@ -143,7 +143,7 @@ namespace MarketPlace.Business.Services.Promotions
                 Gender = p.Gender,
                 RoomType = p.RoomType,
                 Discount = promotionCalculationResponses.Select(x => x.Passengers[index]).Sum(x => x.Discount) > p.BaseFare ? p.BaseFare : promotionCalculationResponses.Select(x => x.Passengers[index]).Sum(x => x.Discount),
-                Fare = promotionCalculationResponses.Select(x => x.Passengers[index]).Sum(x => x.Discount) > p.BaseFare ? 0 : (p.BaseFare - promotionCalculationResponses.Select(x => x.Passengers[index]).Sum(x => x.Discount))
+                Fare = promotionCalculationResponses.Select(x => x.Passengers[index]).Sum(x => x.Discount) > p.BaseFare ? 0 : p.BaseFare - promotionCalculationResponses.Select(x => x.Passengers[index]).Sum(x => x.Discount)
             }).ToList();
         }
 
@@ -243,8 +243,8 @@ namespace MarketPlace.Business.Services.Promotions
                 BaseFare = p.BaseFare,
                 Gender = p.Gender,
                 RoomType = p.RoomType,
-                Discount = (isChildDiscount && p.Age < 18) || ((passangerIndex - 1) == index) ? p.BaseFare : GetDiscount(p.BaseFare, promotionModel.DiscountPer, promotionModel.DiscountAmount),
-                Fare = (isChildDiscount && p.Age < 18) || ((passangerIndex - 1) == index) ? 0 : p.BaseFare - GetDiscount(p.BaseFare, promotionModel.DiscountPer, promotionModel.DiscountAmount)
+                Discount = isChildDiscount && p.Age < 18 || passangerIndex - 1 == index ? p.BaseFare : GetDiscount(p.BaseFare, promotionModel.DiscountPer, promotionModel.DiscountAmount),
+                Fare = isChildDiscount && p.Age < 18 || passangerIndex - 1 == index ? 0 : p.BaseFare - GetDiscount(p.BaseFare, promotionModel.DiscountPer, promotionModel.DiscountAmount)
             }).ToList();
         }
 
@@ -326,8 +326,8 @@ namespace MarketPlace.Business.Services.Promotions
                 promotionModel.MinNoOfChildRequired <= request.Passengers.Count(x => x.Age < 18)
                 && request.Passengers.Any(x => x.Age >= promotionModel.MaxPassengerAge))
             {
-                if ((promotionModel.DiscountPer.HasValue && promotionModel.DiscountPer.Value > 0) ||
-                    (promotionModel.DiscountAmount.HasValue && promotionModel.DiscountAmount.Value > 0))
+                if (promotionModel.DiscountPer.HasValue && promotionModel.DiscountPer.Value > 0 ||
+                    promotionModel.DiscountAmount.HasValue && promotionModel.DiscountAmount.Value > 0)
                 {
                     discount = GetDiscount(request.BaseFare, promotionModel.DiscountPer, promotionModel.DiscountAmount);
                     return new PromotionCalculationResponse

@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.Common.DTOs.RequestModels.Inventory
 {
-    public class CruiseLineRequest
+    public class CruiseLineRequest :RecordBase
     {
         public required string Name { get; set; }
         public required string Code { get; set; }
 
-        public RecordBase? RecordBase { get; set; }
     }
 }

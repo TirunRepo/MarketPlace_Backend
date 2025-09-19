@@ -1,4 +1,4 @@
-﻿using MarketPlace.Business.Interfaces.Inventory;
+﻿using MarketPlace.Business.Services.Interface.Inventory;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.DataAccess.Repositories.Inventory.Interface;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MarketPlace.Business.Services.Inventory
+namespace MarketPlace.Business.Services.Services.Inventory
 {
     public class CruiseCabinPricingService : ICruiseCabinPricingService
     {
@@ -32,7 +32,6 @@ namespace MarketPlace.Business.Services.Inventory
                     TripleRate = model.TripleRate,
                     Tax = model.Tax,
                     Nccf = model.Nccf,
-                    Cabins = model.Cabins,
                     CruiseInventoryId = model.Id,
                     Grats = model.Grats
                 };

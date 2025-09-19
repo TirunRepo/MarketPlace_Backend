@@ -12,7 +12,7 @@ using Promotion.Infrastructure.Queries;
 namespace Marketplace.API.Controllers.Promotions
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class PromotionController : ControllerBase
     {
         private readonly IMediator _mediator;

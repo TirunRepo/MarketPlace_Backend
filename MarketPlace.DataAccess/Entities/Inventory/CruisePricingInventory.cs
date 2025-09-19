@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Entities.Inventory
 {
-    public class CruiseCabinPricingInventory
+    public class CruisePricingInventory:RecordBase
     {
         [Key]
         public int Id { get; set; }
@@ -37,9 +37,6 @@ namespace MarketPlace.DataAccess.Entities.Inventory
         [Required]
         [Column(TypeName = "decimal(10,2)")]
         public decimal Nccf { get; set; }
-        [NotMapped]
-        public List<CruiseCabinDetails> Cabins { get; set; }
 
-        public RecordBase RecordBase { get; set; }
     }
 }

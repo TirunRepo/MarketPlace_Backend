@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.DataAccess.Entities.Inventory
 {
-    public class Destination
-    {
+    public class Destination :RecordBase
+    { 
         [Key]
         public int Id { get; set; }
 
@@ -23,6 +23,5 @@ namespace MarketPlace.DataAccess.Entities.Inventory
         [StringLength(255)]
         public required string Name { get; set; }
 
-        public RecordBase? RecordBase { get; set; }
     }
 }

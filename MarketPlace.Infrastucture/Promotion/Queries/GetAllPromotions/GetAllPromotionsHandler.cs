@@ -1,4 +1,4 @@
-﻿using MarketPlace.Business.Interfaces.Promotions;
+﻿using MarketPlace.Business.Services.Interface.Promotions;
 using MarketPlace.Common.DTOs.ResponseModels.Promotions;
 using MediatR;
 using Promotion.Infrastructure.Queries;

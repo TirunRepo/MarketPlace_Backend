@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Marketplace.API.Controllers.Markup
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class MarkupController : ControllerBase
     {

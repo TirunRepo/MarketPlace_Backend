@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MarketPlace.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250918084942_Initial")]
-    partial class Initial
+    [Migration("20250919041633_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

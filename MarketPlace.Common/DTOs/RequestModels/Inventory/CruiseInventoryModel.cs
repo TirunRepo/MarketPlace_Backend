@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MarketPlace.Common.DTOs.RequestModels.Inventory
 {
-    public class CruiseInventoryModel
+    public class CruiseInventoryModel : RecordBase
     {
 
         public int? Id { get; set; }
@@ -32,8 +32,6 @@ namespace MarketPlace.Common.DTOs.RequestModels.Inventory
         public required string Stateroom { get; set; }
 
         public required string CabinOccupancy { get; set; }
-
-        public RecordBase RecordBase { get; set; }
 
         public bool EnableAdmin { get; set; }
         public bool EnableAgent { get; set; }

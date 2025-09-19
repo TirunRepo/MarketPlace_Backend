@@ -1,5 +1,7 @@
-﻿using MarketPlace.Business.Interfaces.Inventory;
+﻿using MarketPlace.Business.Services.Interface;
+using MarketPlace.Business.Services.Interface.Inventory;
 using MarketPlace.Common.APIResponse;
+using MarketPlace.Common.CommonModel;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.DTOs.ResponseModels.Inventory;
 using MarketPlace.Common.PagedData;
@@ -10,18 +12,20 @@ using System.Threading.Tasks;
 namespace Marketplace.API.Controllers.CruiseShips
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class CruiseShipsController : ControllerBase
     {
         private readonly ICruiseShipService _cruiseShipService;
         private readonly ICruiseLineService _cruiseLineService;
+        private readonly IUserRepository _userRepository;
 
         public CruiseShipsController(
             ICruiseShipService cruiseShipService,
-            ICruiseLineService cruiseLineService)
+            ICruiseLineService cruiseLineService, IUserRepository userRepository)
         {
             _cruiseShipService = cruiseShipService;
             _cruiseLineService = cruiseLineService;
+            _userRepository = userRepository;
         }
 
         // GET: api/CruiseShips?page=1&pageSize=10
@@ -53,7 +57,7 @@ namespace Marketplace.API.Controllers.CruiseShips
         public async Task<IActionResult> AddShip([FromBody] CruiseShipRequest model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(new APIResponse<CruiseLineRequest>
+                return BadRequest(new APIResponse<CruiseShipRequest>
                 {
                     Success = false,
                     Data = null,
@@ -61,12 +65,22 @@ namespace Marketplace.API.Controllers.CruiseShips
                 });
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            model.RecordBase = new()
+            var user = await _userRepository.GetByEmailAsync(userId!);
+            if (user == null)
             {
-                Id = Convert.ToInt32(userId),
-                CreatedBy = User.Identity.Name.ToString(),
-                CreatedOn = DateTime.Now,
+                return BadRequest(new APIResponse<CruiseShipRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Invalid user"
+                });
+            }
+            model.CreatedBy = new()
+            {
+                Id = user.Id,
+                Name = user.FullName
             };
+            model.CreatedOn = DateTime.Now;
             var result = await _cruiseShipService.Insert(model);
 
             if (result != null)
@@ -82,7 +96,7 @@ namespace Marketplace.API.Controllers.CruiseShips
             }
 
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new APIResponse<CruiseLineRequest>
+                new APIResponse<CruiseShipRequest>
                 {
                     Success = false,
                     Data = null,
@@ -90,7 +104,7 @@ namespace Marketplace.API.Controllers.CruiseShips
                 });
         }
 
-        [HttpPost("update")]
+        [HttpPost("update/{id}")]
         public async Task<IActionResult> UpdateShips(int Id,[FromBody] CruiseShipRequest model)
         {
             if (model == null)
@@ -113,12 +127,27 @@ namespace Marketplace.API.Controllers.CruiseShips
                     Message = "User not authorized."
                 });
             }
+            var line = await _cruiseShipService.GetById(Id);
+            var user = await _userRepository.GetByEmailAsync(userId!);
+            if (user == null)
+            {
+                return BadRequest(new APIResponse<CruiseShipRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Invalid user"
+                });
+            }
 
-            // ✅ set updated info
-            model.RecordBase ??= new(); // ensure not null
-            model.RecordBase.UpdatedBy = User.Identity?.Name;
-            model.RecordBase.UpdatedOn = DateTime.Now;
-            model.RecordBase.Id = Convert.ToInt32(userId);
+            model.CreatedBy = line.CreatedBy;
+            model.CreatedOn = line.CreatedOn;
+            model.UpdatedBy = new()
+            {
+                  Id = user.Id,
+                  Name = user.FullName
+            };
+            model.UpdatedOn = DateTime.Now;
+
 
             var updated = await _cruiseShipService.Update(Id, model);
 
@@ -158,6 +187,11 @@ namespace Marketplace.API.Controllers.CruiseShips
                 return false; // error occurred
             }
            
+        }
+        [HttpGet("CruiseLines")]
+        public async Task<List<IdNameModel<int>>> Get()
+        {
+            return await _cruiseLineService.Get();
         }
     }
 }

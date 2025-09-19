@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using MarketPlace.Business.Interfaces;
+using MarketPlace.Business.Services.Interface;
 using MarketPlace.Common.APIResponse;
 using MarketPlace.Common.DTOs;
 using MarketPlace.DataAccess.DBContext;
@@ -8,7 +8,7 @@ using MarketPlace.Infrastucture.JwtTokenGenerator;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-namespace MarketPlace.Business.Services
+namespace MarketPlace.Business.Services.Services
 {
     public class AuthService : IAuthService
     {

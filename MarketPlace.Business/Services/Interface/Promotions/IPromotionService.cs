@@ -1,7 +1,7 @@
 ﻿using MarketPlace.Common.DTOs.RequestModels.Promotions;
 using MarketPlace.Common.DTOs.ResponseModels.Promotions;
 
-namespace MarketPlace.Business.Interfaces.Promotions
+namespace MarketPlace.Business.Services.Interface.Promotions
 {
     public interface IPromotionService
     {

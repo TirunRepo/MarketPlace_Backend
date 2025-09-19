@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
-using MarketPlace.Business.Interfaces;
-using MarketPlace.Business.Interfaces.Inventory;
-using MarketPlace.Business.Interfaces.Promotions;
-using MarketPlace.Business.Services;
-using MarketPlace.Business.Services.Inventory;
-using MarketPlace.Business.Services.Promotions;
+using MarketPlace.Business.Services.Interface;
+using MarketPlace.Business.Services.Interface.Inventory;
+using MarketPlace.Business.Services.Interface.Promotions;
+using MarketPlace.Business.Services.Services;
+using MarketPlace.Business.Services.Services.Inventory;
+using MarketPlace.Business.Services.Services.Promotions;
 using MarketPlace.Common.Mapping;
 using MarketPlace.Common.Validator;
 using MarketPlace.DataAccess.DBContext;

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Azure;
+using MarketPlace.Common.CommonModel;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.DTOs.ResponseModels.Inventory;
 using MarketPlace.Common.PagedData;
@@ -49,12 +51,38 @@ namespace MarketPlace.DataAccess.Repositories.Inventory.Respository
             return entity == null ? null : _mapper.Map<CruiseLineModal>(entity);
         }
 
-        public async Task<PagedData<CruiseLineResponse>> GetList()
+        public async Task<PagedData<CruiseLineResponse>> GetList(int page = 1, int pageSize = 10)
         {
-            var cruiseLines = await _context.CruiseLines.ToListAsync();
-            return _mapper.Map<PagedData<CruiseLineResponse>>(cruiseLines);
-        }
+            var query = _context.CruiseLines.AsQueryable();
 
+            var totalCount = await query.CountAsync();
+
+            var cruiseShips = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var mappedShips = _mapper.Map<List<CruiseLineResponse>>(cruiseShips);
+
+            return new PagedData<CruiseLineResponse>
+            {
+                Items = mappedShips,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+        }
+        public async Task<List<IdNameModel<int>>> Get()
+        {
+            var lines = await _context.CruiseLines.ToListAsync();
+
+            var cruiseLineList = lines.Select(line => new IdNameModel<int>
+            {
+                Id = line.Id,
+                Name = line.Name
+            }).ToList();
+
+            return cruiseLineList;
+        }
         public async Task<bool> Delete(int Id)
         {
             try

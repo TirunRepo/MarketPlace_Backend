@@ -16,7 +16,9 @@ namespace MarketPlace.DataAccess.DBContext
         //Inventory
         public DbSet<CruiseInventory> CruiseInventories { get; set; }
         //CruiseCabinPricingInventory
-        public DbSet<CruiseCabinPricingInventory> CruiseCabinPricingInventories { get; set; }
+        public DbSet<CruisePricingInventory> CruiseCabinPricingInventories { get; set; }
+        //Cabin details
+        public DbSet<CruiseCabinInventory> CruiseCabinInventory { get; set; }
         //DeparturePort
         public DbSet<DeparturePort> DeparturePorts { get; set; }
         //Destination
@@ -31,8 +33,6 @@ namespace MarketPlace.DataAccess.DBContext
         public DbSet<MarkupDetail> MarkupDetails { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Ignore<RecordBase>();
-            modelBuilder.Ignore<CruiseCabinDetails>();
             base.OnModelCreating(modelBuilder);
 
         }

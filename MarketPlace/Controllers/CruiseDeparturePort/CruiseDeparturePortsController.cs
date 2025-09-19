@@ -1,6 +1,8 @@
-﻿using MarketPlace.Business.Interfaces.Inventory;
-using MarketPlace.Business.Services.Inventory;
+﻿using MarketPlace.Business.Services.Interface;
+using MarketPlace.Business.Services.Interface.Inventory;
+using MarketPlace.Business.Services.Services.Inventory;
 using MarketPlace.Common.APIResponse;
+using MarketPlace.Common.CommonModel;
 using MarketPlace.Common.DTOs.RequestModels.Inventory;
 using MarketPlace.Common.DTOs.ResponseModels.Inventory;
 using MarketPlace.Common.PagedData;
@@ -10,56 +12,48 @@ using System.Security.Claims;
 namespace Marketplace.API.Controllers.CruiseDeparturePort
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class CruiseDeparturePortsController : ControllerBase
     {
         private readonly IDeparturePortService _departurePortService;
+        public readonly IDestinationService _destinationService;
+        public readonly IUserRepository _userRepository;
 
         public CruiseDeparturePortsController(
             IDeparturePortService departurePortService,
-            IDestinationService destinationService)
+            IDestinationService destinationService, IUserRepository userRepository)
         {
             _departurePortService = departurePortService;
+            _destinationService = destinationService;
+            _userRepository = userRepository;
         }
 
-        /// <summary>
-        /// Get List of lines
-        /// </summary>
-        /// <param name="page"></param>
-        /// <param name="pageSize"></param>
-        /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<PagedData<CruiseDeparturePortResponse>>> GetList(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetShips(int page = 1, int pageSize = 10)
         {
             if (page <= 0 || pageSize <= 0)
-                return BadRequest("Page and pageSize must be greater than zero.");
-
-            var allCruiseLines = await _departurePortService.GetList();
-
-            var totalCount = allCruiseLines.TotalCount;
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-
-            var pagedCruiseLines = allCruiseLines.Items
-                .OrderBy(c => c.Id)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            var result = new PagedData<CruiseDeparturePortResponse>
             {
-                Items = pagedCruiseLines,
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-                TotalPages = totalPages
-            };
+                return BadRequest(new APIResponse<PagedData<CruiseDeparturePortResponse>>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Page and pageSize must be greater than zero."
+                });
+            }
 
-            return Ok(result);
+            var pagedShips = await _departurePortService.GetList(page, pageSize);
+
+            return Ok(new APIResponse<PagedData<CruiseDeparturePortResponse>>
+            {
+                Success = true,
+                Data = pagedShips,
+                Message = "Cruise ships retrieved successfully."
+            });
         }
 
-        // POST: api/CruiseLines
+        // POST: api/CruiseShips
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] DeparturePortRequest model)
+        public async Task<IActionResult> AddShip([FromBody] DeparturePortRequest model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new APIResponse<DeparturePortRequest>
@@ -70,12 +64,23 @@ namespace Marketplace.API.Controllers.CruiseDeparturePort
                 });
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            model.RecordBase = new()
+            var user = await _userRepository.GetByEmailAsync(userId!);
+            if (user == null)
             {
-                Id = Convert.ToInt32(userId),
-                CreatedBy = User.Identity.Name.ToString(),
-                CreatedOn = DateTime.Now,
+                return BadRequest(new APIResponse<DeparturePortRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Invalid user"
+                });
+            }
+
+            model.CreatedBy = new()
+            {
+                Id = user.Id,
+                Name = user.FullName
             };
+            model.CreatedOn = DateTime.Now;
             var result = await _departurePortService.Insert(model);
 
             if (result != null)
@@ -99,8 +104,8 @@ namespace Marketplace.API.Controllers.CruiseDeparturePort
                 });
         }
 
-        [HttpPost("update")]
-        public async Task<IActionResult> Update(int id, [FromBody] DeparturePortRequest model)
+        [HttpPost("update/{id}")]
+        public async Task<IActionResult> UpdateShips(int Id, [FromBody] DeparturePortRequest model)
         {
             if (model == null)
             {
@@ -122,14 +127,29 @@ namespace Marketplace.API.Controllers.CruiseDeparturePort
                     Message = "User not authorized."
                 });
             }
+            var line = await _departurePortService.GetById(Id);
+            var user = await _userRepository.GetByEmailAsync(userId!);
+            if (user == null)
+            {
+                return BadRequest(new APIResponse<DeparturePortRequest>
+                {
+                    Success = false,
+                    Data = null,
+                    Message = "Invalid user"
+                });
+            }
 
-            // ✅ set updated info
-            model.RecordBase ??= new(); // ensure not null
-            model.RecordBase.UpdatedBy = User.Identity?.Name;
-            model.RecordBase.UpdatedOn = DateTime.Now;
-            model.RecordBase.Id = Convert.ToInt32(userId);
+            model.CreatedBy = line.CreatedBy;
+            model.CreatedOn = line.CreatedOn;
+            model.UpdatedBy = new()
+            {
+                Id = user.Id,
+                Name = user.FullName
+            };
+            model.UpdatedOn = DateTime.Now;
 
-            var updated = await _departurePortService.Update(id, model);
+
+            var updated = await _departurePortService.Update(Id, model);
 
             if (updated == null)
             {
@@ -137,7 +157,7 @@ namespace Marketplace.API.Controllers.CruiseDeparturePort
                 {
                     Success = false,
                     Data = null,
-                    Message = $"Cruise line with ID {id} not found."
+                    Message = $"Cruise line with ID {Id} not found."
                 });
             }
 
@@ -148,18 +168,19 @@ namespace Marketplace.API.Controllers.CruiseDeparturePort
                 Message = "Cruise line updated successfully."
             });
         }
-
-
-        [HttpPost("{id}")]
-        public async Task<bool> Delete(int id)
+        // DELETE: api/Ships/5
+        [HttpDelete("{id:int}")]
+        public async Task<bool> DeleteShip(int id)
         {
             try
             {
+
                 var line = await _departurePortService.GetById(id);
                 if (line == null)
                 {
                     return false; // not found
                 }
+
 
                 return await _departurePortService.Delete(id); ; // deleted successfully
             }
@@ -167,7 +188,12 @@ namespace Marketplace.API.Controllers.CruiseDeparturePort
             {
                 return false; // error occurred
             }
-        }
 
+        }
+        [HttpGet("Destination")]
+        public async Task<List<IdNameModel<int>>> Get()
+        {
+            return await _destinationService.Get();
+        }
     }
 }
